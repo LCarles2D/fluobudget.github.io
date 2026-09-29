@@ -1,1603 +1,2119 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="Control de presupuesto semanal con métricas EVM, historial agrupado por días y dashboard analítico." />
-    <title>BudgetFlow — Control Presupuesto EVM $30</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description"
+    content="Control de presupuesto semanal fácil y visual, registro rápido de gastos y análisis amigable." />
+  <title>Fluo Budget — Control Presupuesto Semanal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-      :root {
-        --bg:        #0f172a;
-        --surface:   #1e293b;
-        --surface2:  #243044;
-        --surface3:  #2e3d56;
-        --border:    rgba(255,255,255,0.08);
-        --border-hl: rgba(99,102,241,0.35);
-        --text:      #f8fafc;
-        --muted:     #94a3b8;
-        --accent:    #38bdf8;
-        --accent2:   #6366f1;
-        --danger:    #ef4444;
-        --success:   #22c55e;
-        --warn:      #f59e0b;
-        --radius:    14px;
-        --radius-sm: 8px;
-        --shadow:    0 4px 24px rgba(0,0,0,0.4);
-        --nav-height: 64px;
-      }
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      body {
-        font-family: 'Inter', -apple-system, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        padding-bottom: calc(var(--nav-height) + 24px);
-        -webkit-font-smoothing: antialiased;
-      }
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #243044;
+      --surface3: #2e3d56;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hl: rgba(99, 102, 241, 0.35);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #6366f1;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --nav-height: 64px;
+    }
 
-      /* HEADER */
-      .app-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px 12px;
-        max-width: 520px;
-        margin: 0 auto;
-        position: sticky;
-        top: 0;
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(10px);
-        z-index: 40;
-        border-bottom: 1px solid var(--border);
-      }
-      .header-left { display: flex; align-items: center; gap: 12px; }
-      .app-logo { font-size: 1.8rem; line-height: 1; }
-      .app-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #60a5fa, #818cf8);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1.2;
-      }
-      .app-subtitle { font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 1px; }
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
 
-      /* MAIN CONTAINER & TABS */
-      main {
-        max-width: 520px;
-        margin: 0 auto;
-        padding: 14px 14px 0;
-      }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 24px);
+      -webkit-font-smoothing: antialiased;
+    }
 
-      .tab-view {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        animation: fadeIn 0.2s ease;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(4px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
+    /* HEADER */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px 12px;
+      max-width: 520px;
+      margin: 0 auto;
+      position: sticky;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 40;
+      border-bottom: 1px solid var(--border);
+    }
 
-      /* CARDS */
-      .card {
-        background: var(--surface);
-        border-radius: var(--radius);
-        padding: 18px 16px;
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow);
-      }
-      .card-inner {
-        background: var(--surface2);
-        border-radius: var(--radius-sm);
-        padding: 14px;
-        border: 1px solid var(--border);
-        margin-bottom: 12px;
-      }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-      .section-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 14px;
-      }
-      .section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 14px;
-      }
-      .section-header .section-title { margin-bottom: 0; }
-      .title-icon { font-size: 1rem; }
+    .app-logo {
+      font-size: 1.8rem;
+      line-height: 1;
+    }
 
-      .badge {
-        font-size: 0.68rem;
-        font-weight: 600;
-        background: rgba(99, 102, 241, 0.15);
-        color: #818cf8;
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        padding: 3px 9px;
-        border-radius: 99px;
-      }
+    .app-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #60a5fa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
 
-      /* METRIC CARDS (EVM) */
-      .metric-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      .metric-card-inner {
-        background: var(--surface2);
-        padding: 12px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .metric-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
-      .metric-icon { font-size: 0.95rem; }
-      .metric-title { font-size: 0.68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
-      .metric-value { font-size: 1.2rem; font-weight: 800; color: var(--text); }
-      .metric-value.negative { color: var(--danger) !important; }
-      .metric-value.positive { color: var(--success) !important; }
-      .metric-value.warn     { color: var(--warn)    !important; }
+    .app-subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 1px;
+    }
 
-      /* RECOMMENDATION BOX */
-      .recommendation-box {
-        background: var(--surface2);
-        border-left: 4px solid var(--accent);
-        border-radius: 4px;
-        padding: 12px 14px;
-        margin-top: 14px;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 0.82rem;
-        line-height: 1.45;
-        transition: border-color 0.3s ease;
-      }
-      .rec-icon { font-size: 1.25rem; flex-shrink: 0; line-height: 1; }
-      .rec-text { flex: 1; color: var(--text); }
+    /* MAIN CONTAINER & TABS */
+    main {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 14px 14px 0;
+    }
 
-      /* ONE-TAP PRODUCT GRID */
-      .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px;
-        margin-bottom: 4px;
-      }
+    .tab-view {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      animation: fadeIn 0.2s ease;
+    }
 
-      .product-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 3px;
-        padding: 12px 8px 10px;
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
-        text-align: center;
-        color: var(--text);
-        -webkit-tap-highlight-color: transparent;
-        position: relative;
-        overflow: hidden;
-      }
-      .product-card::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at center, rgba(99,102,241,0.2) 0%, transparent 70%);
+    @keyframes fadeIn {
+      from {
         opacity: 0;
-        transition: opacity 0.25s;
-      }
-      .product-card:active::after { opacity: 1; }
-      .product-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15);
-        border-color: rgba(99, 102, 241, 0.4);
-      }
-      .product-card:active { transform: scale(0.96); }
-      .product-card.selected {
-        border-color: #6366f1;
-        background: rgba(99,102,241,0.12);
-        box-shadow: 0 0 0 2px rgba(99,102,241,0.3);
+        transform: translateY(4px);
       }
 
-      .pc-icon   { font-size: 1.7rem; line-height: 1.1; margin-bottom: 2px; }
-      .pc-name   { font-size: 0.72rem; font-weight: 600; color: #cbd5e1; line-height: 1.25; min-height: 1.8em; display: flex; align-items: center; }
-      .pc-base   { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
-      .pc-status { font-size: 0.74rem; font-weight: 700; margin-top: 2px; padding: 2px 6px; border-radius: 4px; }
-      .status--ok   { color: #38bdf8; background: rgba(56,189,248,0.1); }
-      .status--zero { color: #94a3b8; background: rgba(148,163,184,0.1); }
-      .status--over { color: #f87171; background: rgba(239,68,68,0.15); }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-      /* CONFIRM PANEL */
-      .confirm-panel {
-        background: linear-gradient(135deg, #1e3a5f 0%, #1e2d4a 100%);
-        border: 1px solid rgba(99, 102, 241, 0.35);
-        border-radius: var(--radius);
-        padding: 16px;
-        margin-top: 12px;
-        animation: slideIn 0.25s ease;
-      }
-      @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-8px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-      .confirm-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-      .confirm-icon       { font-size: 2rem; }
-      .confirm-label      { font-size: 1rem; font-weight: 700; color: var(--text); }
-      .confirm-base-price { font-size: 0.75rem; color: #93c5fd; margin-top: 2px; font-weight: 500; }
-      .confirm-amount-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-      .confirm-amount-label { font-size: 0.82rem; color: var(--muted); flex-shrink: 0; font-weight: 600; }
-      .confirm-amount-input {
-        flex: 1;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.18);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-size: 1.15rem;
-        font-weight: 700;
-        padding: 10px 12px;
-        text-align: center;
-        font-family: 'Inter', sans-serif;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        -webkit-appearance: none;
-      }
-      .confirm-amount-input:focus {
-        outline: none;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
-      }
-      .confirm-actions { display: flex; gap: 8px; }
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
 
-      /* BUTTONS */
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        padding: 10px 16px;
-        border-radius: var(--radius-sm);
-        border: none;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        font-family: 'Inter', sans-serif;
-        -webkit-tap-highlight-color: transparent;
-        flex: 1;
-      }
-      .btn:active { transform: scale(0.96); }
+    .card-inner {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
 
-      .btn-primary {
-        background: linear-gradient(135deg, #4f46e5, #3b82f6);
-        color: #fff;
-        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-      }
-      .btn-primary:hover { box-shadow: 0 6px 20px rgba(79, 70, 229, 0.55); }
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
 
-      .btn-ghost {
-        background: rgba(255,255,255,0.07);
-        color: var(--muted);
-        border: 1px solid var(--border);
-      }
-      .btn-ghost:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
 
-      .btn-danger-ghost {
-        background: rgba(239,68,68,0.1);
-        color: #fca5a5;
-        border: 1px solid rgba(239,68,68,0.25);
-        flex: none;
-      }
-      .btn-danger-ghost:hover { background: rgba(239,68,68,0.2); }
+    .section-header .section-title {
+      margin-bottom: 0;
+    }
 
-      .btn-sm { padding: 7px 12px; font-size: 0.8rem; flex: none; }
+    /* LUCIDE ICONS */
+    .lucide {
+      width: 1em;
+      height: 1em;
+      stroke-width: 2.2px;
+      vertical-align: middle;
+      display: inline-block;
+    }
 
-      .icon-btn {
-        background: rgba(255,255,255,0.07);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 8px 10px;
-        cursor: pointer;
-        font-size: 1rem;
-        color: var(--text);
-        transition: background 0.15s ease;
-        line-height: 1;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .icon-btn:hover  { background: rgba(255,255,255,0.13); }
-      .icon-btn:active { transform: scale(0.93); }
+    .title-icon {
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
 
-      /* EXPENSE LIST & GROUPED DATES */
-      .expense-day-group {
-        margin-bottom: 14px;
-      }
-      .expense-day-group:last-child {
-        margin-bottom: 0;
-      }
-      .day-group-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 6px 8px;
-        background: rgba(255, 255, 255, 0.04);
-        border-left: 3px solid var(--accent);
-        border-radius: 4px;
-        margin-bottom: 8px;
-      }
-      .day-group-title {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: #e2e8f0;
-        text-transform: capitalize;
-      }
-      .day-group-total {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--accent);
-      }
+    .title-icon .lucide {
+      width: 1.15rem;
+      height: 1.15rem;
+    }
 
-      .expense-log { display: flex; flex-direction: column; gap: 6px; }
-      .log-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        background: var(--surface2);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        transition: background 0.15s;
-      }
-      .log-item:hover { background: #2a3a52; }
-      .log-icon  { font-size: 1.25rem; flex-shrink: 0; }
-      .log-info  { flex: 1; min-width: 0; }
-      .log-name-row {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .log-name  {
-        font-size: 0.85rem;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: var(--text);
-      }
-      .log-date   { display: block; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-      .log-amount { font-size: 0.95rem; font-weight: 800; color: var(--text); flex-shrink: 0; }
-      .delete-expense-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 1rem;
-        opacity: 0.45;
-        transition: opacity 0.2s;
-        padding: 4px;
-        border-radius: 6px;
-        -webkit-tap-highlight-color: transparent;
-        line-height: 1;
-      }
-      .delete-expense-btn:hover { opacity: 1; }
+    .badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 3px 9px;
+      border-radius: 99px;
+    }
 
-      .diff {
-        font-size: 0.68rem;
-        font-weight: 700;
-        padding: 1px 5px;
-        border-radius: 4px;
-      }
-      .diff--over  { background: rgba(239,68,68,0.18);  color: #fca5a5; }
-      .diff--under { background: rgba(34,197,94,0.18);  color: #86efac; }
-      .diff--exact { background: rgba(148,163,184,0.15); color: #cbd5e1; }
+    /* METRIC CARDS (EVM) */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-      .empty-state { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px 0; }
+    .metric-card-inner {
+      background: var(--surface2);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
 
-      /* ANALYTICS SECTION */
-      .chart-container {
-        position: relative;
-        width: 100%;
-        min-height: 220px;
-        max-height: 260px;
-        margin-top: 8px;
-      }
-      .chart-card {
-        padding: 16px;
-      }
-      .chart-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-      }
-      .chart-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .chart-desc {
-        font-size: 0.72rem;
-        color: var(--muted);
-      }
+    .metric-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
 
-      /* SUMMARY CARDS IN ANALYTICS */
-      .analytics-summary-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 2px;
-      }
-      .analytics-pill {
-        background: var(--surface2);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 10px 8px;
-        text-align: center;
-      }
-      .pill-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; font-weight: 600; }
-      .pill-value { font-size: 1rem; font-weight: 800; color: var(--text); margin-top: 2px; }
+    .metric-icon {
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
 
-      /* BOTTOM NAVIGATION BAR */
-      .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: var(--nav-height);
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(12px);
-        border-top: 1px solid var(--border);
-        z-index: 50;
-        display: flex;
-        justify-content: center;
-      }
-      .nav-container {
-        width: 100%;
-        max-width: 520px;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        padding: 0 10px;
-      }
-      .nav-btn {
-        background: none;
-        border: none;
-        color: var(--muted);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.72rem;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 8px 16px;
-        border-radius: var(--radius-sm);
-        transition: color 0.15s ease, transform 0.15s ease;
-        -webkit-tap-highlight-color: transparent;
-        flex: 1;
-      }
-      .nav-btn .nav-icon { font-size: 1.25rem; line-height: 1; transition: transform 0.15s ease; }
-      .nav-btn:active { transform: scale(0.92); }
-      .nav-btn.active {
-        color: #38bdf8;
-      }
-      .nav-btn.active .nav-icon {
-        transform: translateY(-2px);
+    .metric-icon .lucide {
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+
+    .metric-title {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .metric-value {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .metric-value.negative {
+      color: var(--danger) !important;
+    }
+
+    .metric-value.positive {
+      color: var(--success) !important;
+    }
+
+    .metric-value.warn {
+      color: var(--warn) !important;
+    }
+
+    /* RECOMMENDATION BOX */
+    .recommendation-box {
+      background: var(--surface2);
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-top: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      transition: border-color 0.3s ease;
+    }
+
+    .rec-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rec-icon .lucide {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .rec-text {
+      flex: 1;
+      color: var(--text);
+    }
+
+    /* ONE-TAP PRODUCT GRID */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 12px 8px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+      text-align: center;
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .product-card:active::after {
+      opacity: 1;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .product-card:active {
+      transform: scale(0.96);
+    }
+
+    .product-card.selected {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.12);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+    }
+
+    .pc-icon {
+      font-size: 1.7rem;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    .pc-name {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      line-height: 1.25;
+      min-height: 1.8em;
+      display: flex;
+      align-items: center;
+    }
+
+    .pc-base {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .pc-status {
+      font-size: 0.74rem;
+      font-weight: 700;
+      margin-top: 2px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .status--ok {
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .status--zero {
+      color: #94a3b8;
+      background: rgba(148, 163, 184, 0.1);
+    }
+
+    .status--over {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* CONFIRM PANEL */
+    .confirm-panel {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1e2d4a 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 12px;
+      animation: slideIn 0.25s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
       }
 
-      /* MODAL: ADMINISTRAR PRODUCTOS */
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(4px);
-        z-index: 100;
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        animation: fadeIn 0.2s ease;
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .confirm-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .confirm-icon {
+      font-size: 2rem;
+    }
+
+    .confirm-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .confirm-base-price {
+      font-size: 0.75rem;
+      color: #93c5fd;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .confirm-amount-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .confirm-amount-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+
+    .confirm-amount-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 10px 12px;
+      text-align: center;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .confirm-amount-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      flex: 1;
+    }
+
+    .btn .lucide {
+      width: 0.95rem;
+      height: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #3b82f6);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.55);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
+
+    .btn-danger-ghost {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      flex: none;
+    }
+
+    .btn-danger-ghost:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-sm {
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      flex: none;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text);
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .icon-btn .lucide {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.93);
+    }
+
+    /* EXPENSE LIST & GROUPED DATES */
+    .expense-day-group {
+      margin-bottom: 14px;
+    }
+
+    .expense-day-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .day-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .day-group-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-transform: capitalize;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .day-group-title .lucide {
+      width: 0.88rem;
+      height: 0.88rem;
+      color: var(--accent);
+    }
+
+    .day-group-total {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .expense-log {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .log-item:hover {
+      background: #2a3a52;
+    }
+
+    .log-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .log-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .log-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .log-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .log-date {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .log-amount {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .delete-expense-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--muted);
+      opacity: 0.55;
+      transition: opacity 0.2s, color 0.2s;
+      padding: 4px;
+      border-radius: 6px;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-expense-btn:hover {
+      opacity: 1;
+      color: var(--danger);
+    }
+
+    .delete-expense-btn .lucide {
+      width: 15px;
+      height: 15px;
+    }
+
+    .diff {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .diff--over {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+    }
+
+    .diff--under {
+      background: rgba(34, 197, 94, 0.18);
+      color: #86efac;
+    }
+
+    .diff--exact {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 24px 0;
+    }
+
+    /* ANALYTICS SECTION */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      max-height: 260px;
+      margin-top: 8px;
+    }
+
+    .chart-card {
+      padding: 16px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .chart-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .chart-title .lucide {
+      width: 1.05rem;
+      height: 1.05rem;
+      color: var(--accent);
+    }
+
+    .chart-desc {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* SUMMARY CARDS IN ANALYTICS */
+    .analytics-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+
+    .analytics-pill {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .pill-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .pill-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    /* BOTTOM NAVIGATION BAR */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+    }
+
+    .nav-container {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      transition: color 0.15s ease, transform 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      flex: 1;
+    }
+
+    .nav-btn .nav-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      transition: transform 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn .nav-icon .lucide {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    .nav-btn:active {
+      transform: scale(0.92);
+    }
+
+    .nav-btn.active {
+      color: #38bdf8;
+    }
+
+    .nav-btn.active .nav-icon {
+      transform: translateY(-2px);
+    }
+
+    /* MODAL: ADMINISTRAR PRODUCTOS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-container {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 16px 32px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(40px);
+        opacity: 0;
       }
 
-      .modal-container {
-        background: var(--surface);
-        border-radius: 20px 20px 0 0;
-        padding: 20px 16px 32px;
-        width: 100%;
-        max-width: 520px;
-        max-height: 85vh;
-        overflow-y: auto;
-        border: 1px solid var(--border);
-        border-bottom: none;
-        animation: slideUp 0.3s ease;
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
-      @keyframes slideUp {
-        from { transform: translateY(40px); opacity: 0; }
-        to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-title .lucide {
+      width: 1.15rem;
+      height: 1.15rem;
+      color: var(--accent);
+    }
+
+    .form-subtitle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-subtitle .lucide {
+      width: 0.95rem;
+      height: 0.95rem;
+      color: var(--accent2);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .form-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 0.88rem;
+      padding: 10px 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .form-input--sm {
+      max-width: 110px;
+      text-align: right;
+    }
+
+    .form-input--icon {
+      max-width: 70px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .admin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .admin-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .admin-item:hover {
+      background: #2a3a52;
+    }
+
+    .admin-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .admin-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .admin-name {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .admin-price {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .admin-footer {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--nav-height) + 16px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 200;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      animation: toastIn 0.25s ease;
+      max-width: 320px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
       }
 
-      .modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
       }
-      .modal-title { font-size: 1rem; font-weight: 700; }
+    }
 
-      .form-subtitle { font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
-      .form-row {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
-        align-items: center;
-      }
-      .form-input {
-        flex: 1;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-size: 0.88rem;
-        padding: 10px 12px;
-        font-family: 'Inter', sans-serif;
-        transition: border-color 0.2s;
-        -webkit-appearance: none;
-      }
-      .form-input:focus {
-        outline: none;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
-      }
-      .form-input--sm   { max-width: 110px; text-align: right; }
-      .form-input--icon { max-width: 70px; text-align: center; font-size: 1.2rem; }
-      .form-actions { display: flex; gap: 6px; align-items: center; }
+    .toast--success {
+      background: #166534;
+      color: #bbf7d0;
+      border: 1px solid #22c55e;
+    }
 
-      .admin-list { display: flex; flex-direction: column; gap: 6px; }
-      .admin-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 12px;
-        background: var(--surface2);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border);
-        transition: background 0.15s;
-      }
-      .admin-item:hover { background: #2a3a52; }
-      .admin-icon   { font-size: 1.3rem; flex-shrink: 0; }
-      .admin-info   { flex: 1; min-width: 0; }
-      .admin-name   { display: block; font-size: 0.85rem; font-weight: 600; }
-      .admin-price  { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
-      .admin-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .toast--error {
+      background: #7f1d1d;
+      color: #fecaca;
+      border: 1px solid #ef4444;
+    }
 
-      .admin-footer {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid var(--border);
-        display: flex;
-        justify-content: flex-end;
+    .toast--info {
+      background: #1e3a5f;
+      color: #bfdbfe;
+      border: 1px solid #3b82f6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 99px;
+    }
+
+    @media (max-width: 380px) {
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       }
 
-      /* TOAST */
-      .toast {
-        position: fixed;
-        bottom: calc(var(--nav-height) + 16px);
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 12px 20px;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        z-index: 200;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-        animation: toastIn 0.25s ease;
-        max-width: 320px;
-        text-align: center;
-        white-space: nowrap;
+      .pc-icon {
+        font-size: 1.4rem;
       }
-      @keyframes toastIn {
-        from { opacity: 0; transform: translateX(-50%) translateY(10px); }
-        to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-      }
-      .toast--success { background: #166534; color: #bbf7d0; border: 1px solid #22c55e; }
-      .toast--error   { background: #7f1d1d; color: #fecaca; border: 1px solid #ef4444; }
-      .toast--info    { background: #1e3a5f; color: #bfdbfe; border: 1px solid #3b82f6; }
+    }
+  </style>
+</head>
 
-      .hidden { display: none !important; }
+<body>
 
-      ::-webkit-scrollbar { width: 4px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #334155; border-radius: 99px; }
-
-      @media (max-width: 380px) {
-        .product-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-        .pc-icon { font-size: 1.4rem; }
-      }
-    </style>
-  </head>
-  <body>
-
-    <!-- HEADER -->
-    <header class="app-header">
-      <div class="header-left">
-        <div class="app-logo">💰</div>
-        <div>
-          <h1 class="app-title">BudgetFlow</h1>
-          <p class="app-subtitle">Semana · $30.00 BAC</p>
-        </div>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="app-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="36" height="36">
+          <defs>
+            <linearGradient id="fluoGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#22c55e" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+          <rect x="5" y="5" width="110" height="110" rx="28" fill="#1e293b" stroke="#334155" stroke-width="2" />
+          <path d="M 40 85 L 40 45 C 40 36.5 46.5 30 55 30 L 75 30" fill="none" stroke="url(#fluoGradient)"
+            stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M 40 58 L 60 58" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" />
+          <circle cx="75" cy="30" r="6" fill="#3b82f6" />
+        </svg>
       </div>
-      <button id="openProductsBtn" class="icon-btn" aria-label="Administrar Productos" title="Administrar Productos">
-        ⚙️
-      </button>
-    </header>
-
-    <main>
-
-      <!-- ================= PESTAÑA 1: REGISTRO (INICIO) ================= -->
-      <section id="tabRegister" class="tab-view">
-
-        <!-- MÉTRICAS EVM -->
-        <div class="card metrics-card" aria-labelledby="metricsTitle">
-          <h2 id="metricsTitle" class="section-title">
-            <span class="title-icon">📊</span> Métricas EVM Semanales
-          </h2>
-          <div class="metric-grid">
-            <div class="metric-card-inner">
-              <div class="metric-header"><span class="metric-icon">💸</span><span class="metric-title">Gasto Real (AC)</span></div>
-              <div class="metric-value" id="acValue">$0.00</div>
-            </div>
-            <div class="metric-card-inner">
-              <div class="metric-header"><span class="metric-icon">🏦</span><span class="metric-title">Restante</span></div>
-              <div class="metric-value" id="remainingValue">$30.00</div>
-            </div>
-            <div class="metric-card-inner">
-              <div class="metric-header"><span class="metric-icon">📉</span><span class="metric-title">Cost Variance (CV)</span></div>
-              <div class="metric-value" id="cvValue">$0.00</div>
-            </div>
-            <div class="metric-card-inner">
-              <div class="metric-header"><span class="metric-icon">⚡</span><span class="metric-title">Índice CPI</span></div>
-              <div class="metric-value" id="cpiValue">1.00</div>
-            </div>
-          </div>
-          
-          <div id="recommendationBox" class="recommendation-box">
-            <span class="rec-icon">👍</span>
-            <span class="rec-text"><strong>Línea Base Correcta:</strong> Gastos perfectamente alineados al plan.</span>
-          </div>
-        </div>
-
-        <!-- REGISTRO RÁPIDO ONE-TAP -->
-        <div class="card" id="quickRegisterSection" aria-labelledby="quickTitle">
-          <div class="section-header">
-            <h2 id="quickTitle" class="section-title">
-              <span class="title-icon">⚡</span> Registro Rápido
-            </h2>
-            <span class="badge" id="productCount">0 productos</span>
-          </div>
-
-          <div id="productGrid" class="product-grid" role="list" aria-label="Productos y categorías disponibles">
-          </div>
-
-          <!-- Panel de confirmación -->
-          <div id="confirmPanel" class="confirm-panel hidden" role="dialog" aria-label="Confirmar gasto">
-            <div class="confirm-header">
-              <span id="confirmProductIcon" class="confirm-icon">🛒</span>
-              <div>
-                <p class="confirm-label" id="confirmProductName">Producto</p>
-                <p class="confirm-base-price" id="confirmBasePrice">Precio base planificado: $0.00</p>
-              </div>
-            </div>
-            <div class="confirm-amount-row">
-              <label for="confirmAmount" class="confirm-amount-label">Monto real ($):</label>
-              <input
-                type="number"
-                id="confirmAmount"
-                class="confirm-amount-input"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                inputmode="decimal"
-                aria-label="Monto real del gasto"
-              />
-            </div>
-            <div class="confirm-actions">
-              <button id="cancelConfirmBtn" class="btn btn-ghost">✕ Cancelar</button>
-              <button id="addExpenseBtn"    class="btn btn-primary">✓ Registrar</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- HISTORIAL DE HOY -->
-        <div class="card" aria-labelledby="todayTitle">
-          <div class="section-header">
-            <h2 id="todayTitle" class="section-title">
-              <span class="title-icon">📅</span> Gastos de Hoy
-            </h2>
-            <span class="badge" id="todaySpentBadge">Total hoy: $0.00</span>
-          </div>
-          <div id="todayExpenseLog" class="expense-log" aria-live="polite">
-            <p class="empty-state">Sin gastos registrados el día de hoy.</p>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ================= PESTAÑA 2: HISTORIAL EXTENDIDO ================= -->
-      <section id="tabHistory" class="tab-view hidden">
-        <div class="card" aria-labelledby="historyTitle">
-          <div class="section-header">
-            <h2 id="historyTitle" class="section-title">
-              <span class="title-icon">📋</span> Historial Semanal
-            </h2>
-            <button id="resetBtn" class="btn btn-danger-ghost btn-sm" aria-label="Reiniciar semana">
-              🔄 Reset Semana
-            </button>
-          </div>
-
-          <div id="fullExpenseLog" class="expense-log" aria-live="polite">
-            <p class="empty-state">Sin gastos registrados esta semana.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= PESTAÑA 3: ANÁLISIS EVM ================= -->
-      <section id="tabAnalytics" class="tab-view hidden">
-
-        <!-- RESUMEN EVM -->
-        <div class="analytics-summary-grid">
-          <div class="analytics-pill">
-            <div class="pill-label">Total EV</div>
-            <div class="pill-value" id="summaryEV">$0.00</div>
-          </div>
-          <div class="analytics-pill">
-            <div class="pill-label">Total AC</div>
-            <div class="pill-value" id="summaryAC">$0.00</div>
-          </div>
-          <div class="analytics-pill">
-            <div class="pill-label">Net CV</div>
-            <div class="pill-value" id="summaryCV">$0.00</div>
-          </div>
-        </div>
-
-        <!-- GRÁFICA A: BURN-DOWN DEL PRESUPUESTO -->
-        <div class="card chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">🔥 Gráfica Burn-Down</h3>
-            <span class="badge">Presupuesto $30 a $0</span>
-          </div>
-          <p class="chart-desc">Consumo acumulativo del presupuesto de $30.00 a lo largo de la semana.</p>
-          <div class="chart-container">
-            <canvas id="burnDownChart"></canvas>
-          </div>
-        </div>
-
-        <!-- GRÁFICA B: EV vs AC POR CATEGORÍA -->
-        <div class="card chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">📊 Planificado (EV) vs Real (AC)</h3>
-            <span class="badge">Por Categoría</span>
-          </div>
-          <p class="chart-desc">Compara la línea base asignada contra el gasto acumulado en cada categoría.</p>
-          <div class="chart-container">
-            <canvas id="categoryComparisonChart"></canvas>
-          </div>
-        </div>
-
-        <!-- GRÁFICA C: TENDENCIA DE COST VARIANCE (CV) -->
-        <div class="card chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">📈 Tendencia de Varianza (CV)</h3>
-            <span class="badge" id="cvTrendBadge">CV Acumulado</span>
-          </div>
-          <p class="chart-desc">Evolución de sobrecostos (&lt; $0) o ahorros (&gt; $0) en la línea base.</p>
-          <div class="chart-container">
-            <canvas id="cvTrendChart"></canvas>
-          </div>
-        </div>
-
-      </section>
-
-    </main>
-
-    <!-- BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) -->
-    <nav class="bottom-nav" aria-label="Navegación principal">
-      <div class="nav-container">
-        <button class="nav-btn active" data-tab="tabRegister" aria-label="Pantalla de Registro">
-          <span class="nav-icon">⚡</span>
-          <span>Registro</span>
-        </button>
-        <button class="nav-btn" data-tab="tabHistory" aria-label="Pantalla de Historial">
-          <span class="nav-icon">📋</span>
-          <span>Historial</span>
-        </button>
-        <button class="nav-btn" data-tab="tabAnalytics" aria-label="Pantalla de Análisis">
-          <span class="nav-icon">📊</span>
-          <span>Análisis</span>
-        </button>
-      </div>
-    </nav>
-
-    <!-- MODAL: ADMINISTRAR PRODUCTOS -->
-    <div id="productsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h2 id="modalTitle" class="modal-title">⚙️ Administrar Productos</h2>
-          <button id="closeProductsBtn" class="icon-btn" aria-label="Cerrar modal">✕</button>
-        </div>
-
-        <div class="product-form card-inner" id="productFormWrapper">
-          <h3 class="form-subtitle" id="productFormTitle">➕ Nuevo Producto / Categoría</h3>
-          <div class="form-row">
-            <input type="text"   id="pName"  class="form-input" placeholder="Nombre (ej. Súper)" maxlength="30" aria-label="Nombre del producto" />
-            <input type="number" id="pPrice" class="form-input form-input--sm" step="0.01" min="0" placeholder="$ Base" inputmode="decimal" aria-label="Precio base" />
-          </div>
-          <div class="form-row">
-            <input type="text" id="pIcon" class="form-input form-input--icon" placeholder="Emoji" maxlength="4" aria-label="Emoji del producto" />
-            <div class="form-actions">
-              <button id="cancelEditBtn" class="btn btn-ghost btn-sm hidden">Cancelar</button>
-              <button id="saveProductBtn" class="btn btn-primary btn-sm">Guardar</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="adminProductList" class="admin-list" role="list" aria-label="Lista de productos">
-        </div>
-
-        <div class="admin-footer">
-          <button id="restoreDefaultsBtn" class="btn btn-ghost btn-sm" title="Restaura los 7 productos base predefinidos">
-            ↺ Restaurar productos por defecto
-          </button>
-        </div>
+      <div>
+        <h1 class="app-title">Fluo Budget</h1>
+        <p class="app-subtitle">Semana · Presupuesto $30.00</p>
       </div>
     </div>
+    <button id="openProductsBtn" class="icon-btn" aria-label="Administrar Productos" title="Administrar Productos">
+      <i data-lucide="settings"></i>
+    </button>
+  </header>
 
-    <!-- TOAST -->
-    <div id="toast" class="toast hidden" role="alert" aria-live="assertive"></div>
+  <main>
 
-    <script>
-      const BUDGET            = 30.0;
-      const CAFE_UNIT         = 0.35;
-      const STORAGE_PRODUCTS  = 'custom_products_30';
-      const STORAGE_EXPENSES  = 'astro_expenses_30';
+    <!-- ================= PESTAÑA 1: REGISTRO (INICIO) ================= -->
+    <section id="tabRegister" class="tab-view">
 
-      const DEFAULT_PRODUCTS = [
-        { id: 'p1', name: 'Pasaje Ida',        price: 2.15, icon: '🚌' },
-        { id: 'p2', name: 'Pasaje Vuelta',      price: 1.90, icon: '🚌' },
-        { id: 'p3', name: 'Cenas con Amigos',   price: 1.70, icon: '🍽️' },
-        { id: 'p4', name: 'Café Tarde',         price: 0.35, icon: '☕' },
-        { id: 'p5', name: 'Almuerzo Lunes',     price: 2.00, icon: '🥗' },
-        { id: 'p6', name: 'Súper Mercado',      price: 8.50, icon: '🛒' },
-        { id: 'p7', name: 'Salida Novia',       price: 5.00, icon: '💑' },
-      ];
+      <!-- RESUMEN DE LA SEMANA -->
+      <div class="card metrics-card" aria-labelledby="metricsTitle">
+        <h2 id="metricsTitle" class="section-title">
+          <span class="title-icon"><i data-lucide="bar-chart-3"></i></span> Resumen de la Semana
+        </h2>
+        <div class="metric-grid">
+          <div class="metric-card-inner">
+            <div class="metric-header"><span class="metric-icon"><i data-lucide="dollar-sign"></i></span><span
+                class="metric-title">Total Gastado</span></div>
+            <div class="metric-value" id="acValue">$0.00</div>
+          </div>
+          <div class="metric-card-inner">
+            <div class="metric-header"><span class="metric-icon"><i data-lucide="piggy-bank"></i></span><span
+                class="metric-title">Disponible</span>
+            </div>
+            <div class="metric-value" id="remainingValue">$30.00</div>
+          </div>
+          <div class="metric-card-inner">
+            <div class="metric-header"><span class="metric-icon"><i data-lucide="trending-down"></i></span><span
+                class="metric-title">Balance / Ahorro</span></div>
+            <div class="metric-value" id="cvValue">$0.00</div>
+          </div>
+          <div class="metric-card-inner">
+            <div class="metric-header"><span class="metric-icon"><i data-lucide="zap"></i></span><span
+                class="metric-title">Rendimiento</span>
+            </div>
+            <div class="metric-value" id="cpiValue">1.00</div>
+          </div>
+        </div>
 
-      const DAYS_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        <div id="recommendationBox" class="recommendation-box">
+          <span class="rec-icon"><i data-lucide="thumbs-up"></i></span>
+          <span class="rec-text"><strong>Vas al día:</strong> Tus gastos van exactamente de acuerdo a lo planeado para esta semana.</span>
+        </div>
+      </div>
 
-      let products        = loadProducts();
-      let expenses        = loadExpenses();
-      let selectedProduct = null;
-      let editingId       = null;
-      let activeTabId     = 'tabRegister';
+      <!-- REGISTRO RÁPIDO ONE-TAP -->
+      <div class="card" id="quickRegisterSection" aria-labelledby="quickTitle">
+        <div class="section-header">
+          <h2 id="quickTitle" class="section-title">
+            <span class="title-icon"><i data-lucide="zap"></i></span> Registro Rápido
+          </h2>
+          <span class="badge" id="productCount">0 productos</span>
+        </div>
 
-      // Instancias de Chart.js
-      let burnDownChartInstance = null;
-      let categoryChartInstance = null;
-      let cvTrendChartInstance  = null;
+        <div id="productGrid" class="product-grid" role="list" aria-label="Productos y categorías disponibles">
+        </div>
 
-      function loadProducts() {
-        try {
-          const s = localStorage.getItem(STORAGE_PRODUCTS);
-          if (!s) return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-          const parsed = JSON.parse(s);
-          return Array.isArray(parsed) && parsed.length > 0 ? parsed : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-        } catch {
-          return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-        }
+        <!-- Panel de confirmación -->
+        <div id="confirmPanel" class="confirm-panel hidden" role="dialog" aria-label="Confirmar gasto">
+          <div class="confirm-header">
+            <span id="confirmProductIcon" class="confirm-icon">🛒</span>
+            <div>
+              <p class="confirm-label" id="confirmProductName">Producto</p>
+              <p class="confirm-base-price" id="confirmBasePrice">Precio estimado: $0.00</p>
+            </div>
+          </div>
+          <div class="confirm-amount-row">
+            <label for="confirmAmount" class="confirm-amount-label">¿Cuánto pagaste? ($):</label>
+            <input type="number" id="confirmAmount" class="confirm-amount-input" step="0.01" min="0" placeholder="0.00"
+              inputmode="decimal" aria-label="Monto real del gasto" />
+          </div>
+          <div class="confirm-actions">
+            <button id="cancelConfirmBtn" class="btn btn-ghost"><i data-lucide="x"></i> Cancelar</button>
+            <button id="addExpenseBtn" class="btn btn-primary"><i data-lucide="check"></i> Registrar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL DE HOY -->
+      <div class="card" aria-labelledby="todayTitle">
+        <div class="section-header">
+          <h2 id="todayTitle" class="section-title">
+            <span class="title-icon"><i data-lucide="calendar"></i></span> Gastos de Hoy
+          </h2>
+          <span class="badge" id="todaySpentBadge">Total hoy: $0.00</span>
+        </div>
+        <div id="todayExpenseLog" class="expense-log" aria-live="polite">
+          <p class="empty-state">Sin gastos registrados el día de hoy.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= PESTAÑA 2: HISTORIAL EXTENDIDO ================= -->
+    <section id="tabHistory" class="tab-view hidden">
+      <div class="card" aria-labelledby="historyTitle">
+        <div class="section-header">
+          <h2 id="historyTitle" class="section-title">
+            <span class="title-icon"><i data-lucide="clipboard-list"></i></span> Historial Semanal
+          </h2>
+          <button id="resetBtn" class="btn btn-danger-ghost btn-sm" aria-label="Reiniciar semana">
+            <i data-lucide="rotate-ccw"></i> Reset Semana
+          </button>
+        </div>
+
+        <div id="fullExpenseLog" class="expense-log" aria-live="polite">
+          <p class="empty-state">Sin gastos registrados esta semana.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PESTAÑA 3: ANÁLISIS EVM ================= -->
+    <section id="tabAnalytics" class="tab-view hidden">
+
+      <!-- RESUMEN -->
+      <div class="analytics-summary-grid">
+        <div class="analytics-pill">
+          <div class="pill-label">Presupuesto</div>
+          <div class="pill-value" id="summaryEV">$0.00</div>
+        </div>
+        <div class="analytics-pill">
+          <div class="pill-label">Total Gastado</div>
+          <div class="pill-value" id="summaryAC">$0.00</div>
+        </div>
+        <div class="analytics-pill">
+          <div class="pill-label">Balance Neto</div>
+          <div class="pill-value" id="summaryCV">$0.00</div>
+        </div>
+      </div>
+
+      <!-- GRÁFICA A: CONSUMO DE PRESUPUESTO -->
+      <div class="card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title"><i data-lucide="flame"></i> Consumo de Presupuesto</h3>
+          <span class="badge">De $30 a $0</span>
+        </div>
+        <p class="chart-desc">Seguimiento de tu dinero disponible a lo largo de la semana.</p>
+        <div class="chart-container">
+          <canvas id="burnDownChart"></canvas>
+        </div>
+      </div>
+
+      <!-- GRÁFICA B: PRESUPUESTO VS GASTO REAL POR CATEGORÍA -->
+      <div class="card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title"><i data-lucide="bar-chart-2"></i> Presupuesto vs Gasto Real</h3>
+          <span class="badge">Por Categoría</span>
+        </div>
+        <p class="chart-desc">Compara cuánto planeabas gastar contra lo que realmente gastaste en cada categoría.</p>
+        <div class="chart-container">
+          <canvas id="categoryComparisonChart"></canvas>
+        </div>
+      </div>
+
+      <!-- GRÁFICA C: TENDENCIA DE AHORRO / BALANCE -->
+      <div class="card chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title"><i data-lucide="trending-up"></i> Tendencia de Ahorro</h3>
+          <span class="badge" id="cvTrendBadge">Balance Acumulado</span>
+        </div>
+        <p class="chart-desc">Muestra si vas acumulando ahorros (arriba de $0) o gastos extras (debajo de $0).</p>
+        <div class="chart-container">
+          <canvas id="cvTrendChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (BOTTOM NAV) -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <div class="nav-container">
+      <button class="nav-btn active" data-tab="tabRegister" aria-label="Pantalla de Registro">
+        <span class="nav-icon"><i data-lucide="zap"></i></span>
+        <span>Registro</span>
+      </button>
+      <button class="nav-btn" data-tab="tabHistory" aria-label="Pantalla de Historial">
+        <span class="nav-icon"><i data-lucide="clipboard-list"></i></span>
+        <span>Historial</span>
+      </button>
+      <button class="nav-btn" data-tab="tabAnalytics" aria-label="Pantalla de Análisis">
+        <span class="nav-icon"><i data-lucide="pie-chart"></i></span>
+        <span>Análisis</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: ADMINISTRAR PRODUCTOS -->
+  <div id="productsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 id="modalTitle" class="modal-title"><i data-lucide="settings"></i> Administrar Productos</h2>
+        <button id="closeProductsBtn" class="icon-btn" aria-label="Cerrar modal"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="product-form card-inner" id="productFormWrapper">
+        <h3 class="form-subtitle" id="productFormTitle"><i data-lucide="plus-circle"></i> Nuevo Producto / Categoría
+        </h3>
+        <div class="form-row">
+          <input type="text" id="pName" class="form-input" placeholder="Nombre (ej. Súper)" maxlength="30"
+            aria-label="Nombre del producto" />
+          <input type="number" id="pPrice" class="form-input form-input--sm" step="0.01" min="0" placeholder="$ Estimado"
+            inputmode="decimal" aria-label="Precio estimado" />
+        </div>
+        <div class="form-row">
+          <input type="text" id="pIcon" class="form-input form-input--icon" placeholder="Emoji" maxlength="4"
+            aria-label="Emoji del producto" />
+          <div class="form-actions">
+            <button id="cancelEditBtn" class="btn btn-ghost btn-sm hidden">Cancelar</button>
+            <button id="saveProductBtn" class="btn btn-primary btn-sm">Guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="adminProductList" class="admin-list" role="list" aria-label="Lista de productos">
+      </div>
+
+      <div class="admin-footer">
+        <button id="restoreDefaultsBtn" class="btn btn-ghost btn-sm" title="Restaura los 7 productos y presupuestos predefinidos">
+          <i data-lucide="rotate-ccw"></i> Restaurar productos por defecto
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast hidden" role="alert" aria-live="assertive"></div>
+
+  <script>
+    const BUDGET = 30.0;
+    const CAFE_UNIT = 0.35;
+    const STORAGE_PRODUCTS = 'custom_products_30';
+    const STORAGE_EXPENSES = 'astro_expenses_30';
+
+    const DEFAULT_PRODUCTS = [
+      { id: 'p1', name: 'Pasaje Ida', price: 2.15, icon: '🚌' },
+      { id: 'p2', name: 'Pasaje Vuelta', price: 1.90, icon: '🚌' },
+      { id: 'p3', name: 'Cenas con Amigos', price: 1.70, icon: '🍽️' },
+      { id: 'p4', name: 'Café Tarde', price: 0.35, icon: '☕' },
+      { id: 'p5', name: 'Almuerzo Lunes', price: 2.00, icon: '🥗' },
+      { id: 'p6', name: 'Súper Mercado', price: 8.50, icon: '🛒' },
+      { id: 'p7', name: 'Salida Novia', price: 5.00, icon: '💑' },
+    ];
+
+    const DAYS_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    let products = loadProducts();
+    let expenses = loadExpenses();
+    let selectedProduct = null;
+    let editingId = null;
+    let activeTabId = 'tabRegister';
+
+    // Instancias de Chart.js
+    let burnDownChartInstance = null;
+    let categoryChartInstance = null;
+    let cvTrendChartInstance = null;
+    if (window.Chart) {
+      Chart.defaults.font.family = "'Plus Jakarta Sans', -apple-system, sans-serif";
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
       }
-      function saveProducts() { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)); }
+    }
 
-      function loadExpenses() {
-        try {
-          const s = localStorage.getItem(STORAGE_EXPENSES);
-          return s ? JSON.parse(s) : [];
-        } catch {
-          return [];
-        }
+    function loadProducts() {
+      try {
+        const s = localStorage.getItem(STORAGE_PRODUCTS);
+        if (!s) return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+        const parsed = JSON.parse(s);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+      } catch {
+        return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
       }
-      function saveExpenses() { localStorage.setItem(STORAGE_EXPENSES, JSON.stringify(expenses)); }
+    }
+    function saveProducts() { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)); }
 
-      function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 7); }
-
-      // Toast feedback
-      function showToast(msg, type = 'success') {
-        const toast = document.getElementById('toast');
-        toast.textContent = msg;
-        toast.className = 'toast toast--' + type;
-        setTimeout(() => { toast.className = 'toast hidden'; }, 2800);
+    function loadExpenses() {
+      try {
+        const s = localStorage.getItem(STORAGE_EXPENSES);
+        return s ? JSON.parse(s) : [];
+      } catch {
+        return [];
       }
+    }
+    function saveExpenses() { localStorage.setItem(STORAGE_EXPENSES, JSON.stringify(expenses)); }
 
-      // ================= CONTROLADOR DE PESTAÑAS =================
-      const navButtons = document.querySelectorAll('.nav-btn');
-      navButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const targetTab = btn.dataset.tab;
-          if (targetTab === activeTabId) return;
+    function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 7); }
 
-          navButtons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+    // Toast feedback
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast toast--' + type;
+      setTimeout(() => { toast.className = 'toast hidden'; }, 2800);
+    }
 
-          document.querySelectorAll('.tab-view').forEach(view => {
-            view.classList.add('hidden');
-          });
+    // ================= CONTROLADOR DE PESTAÑAS =================
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.dataset.tab;
+        if (targetTab === activeTabId) return;
 
-          const activeView = document.getElementById(targetTab);
-          if (activeView) activeView.classList.remove('hidden');
-          activeTabId = targetTab;
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
 
-          // Si cambiamos a análisis, renderizar/redimensionar las gráficas
-          if (targetTab === 'tabAnalytics') {
-            renderAnalyticsCharts();
-          } else if (targetTab === 'tabHistory') {
-            renderFullHistory();
-          }
+        document.querySelectorAll('.tab-view').forEach(view => {
+          view.classList.add('hidden');
         });
-      });
 
-      // ================= CÁLCULO DE DASHBOARD EVM =================
-      function updateDashboard() {
-        let totalAC = 0;
-        let totalEV = 0;
+        const activeView = document.getElementById(targetTab);
+        if (activeView) activeView.classList.remove('hidden');
+        activeTabId = targetTab;
 
-        expenses.forEach(item => {
-          totalAC += item.amount;
-          totalEV += (typeof item.basePrice === 'number' ? item.basePrice : item.amount);
-        });
-
-        const remaining = BUDGET - totalAC;
-        const cv        = totalEV - totalAC;
-        const cpi       = totalAC > 0 ? (totalEV / totalAC) : 1.0;
-
-        setMetric('acValue',        '$' + totalAC.toFixed(2));
-        setMetric('remainingValue', '$' + remaining.toFixed(2), remaining < 5 ? 'negative' : remaining < 10 ? 'warn' : 'positive');
-        setMetric('cvValue',        (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2), cv < 0 ? 'negative' : cv > 0 ? 'positive' : '');
-        setMetric('cpiValue',       cpi.toFixed(2), cpi < 1 ? 'negative' : 'positive');
-
-        // Valores de resumen en pestaña de análisis
-        const summaryEV = document.getElementById('summaryEV');
-        const summaryAC = document.getElementById('summaryAC');
-        const summaryCV = document.getElementById('summaryCV');
-        if (summaryEV) summaryEV.textContent = '$' + totalEV.toFixed(2);
-        if (summaryAC) summaryAC.textContent = '$' + totalAC.toFixed(2);
-        if (summaryCV) {
-          summaryCV.textContent = (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2);
-          summaryCV.style.color = cv < 0 ? 'var(--danger)' : cv > 0 ? 'var(--success)' : 'var(--text)';
-        }
-
-        const recBox  = document.getElementById('recommendationBox');
-        const recIcon = recBox.querySelector('.rec-icon');
-        const recText = recBox.querySelector('.rec-text');
-
-        // Algoritmo de Acción Correctiva
-        if (cv < 0) {
-          const deficit    = Math.abs(cv).toFixed(2);
-          const cafesToCut = Math.ceil(Math.abs(cv) / CAFE_UNIT);
-          recIcon.textContent = '⚠️';
-          recText.innerHTML = '<strong>Desviación Negativa (-$' + deficit + '):</strong> Sobrecosto detectado sobre el precio base planificado.<br>👉 <em>Acción Correctiva:</em> Recorta <strong>' + cafesToCut + ' café(s) ☕</strong> ($0.35 c/u) para reequilibrar la línea base.';
-          recBox.style.borderLeftColor = 'var(--danger)';
-        } else if (cv > 0) {
-          recIcon.textContent = '✅';
-          recText.innerHTML = '<strong>Ahorro en Línea Base (+$' + cv.toFixed(2) + '):</strong> Gastos por debajo del costo planificado. ¡Excelente rendimiento!';
-          recBox.style.borderLeftColor = 'var(--success)';
-        } else {
-          recIcon.textContent = '👍';
-          recText.innerHTML = '<strong>Línea Base Correcta:</strong> Gastos perfectamente alineados al plan semanal.';
-          recBox.style.borderLeftColor = 'var(--accent)';
-        }
-
-        renderTodayExpenseLog();
-        renderFullHistory();
-        saveExpenses();
-
-        if (activeTabId === 'tabAnalytics') {
+        // Si cambiamos a análisis, renderizar/redimensionar las gráficas
+        if (targetTab === 'tabAnalytics') {
           renderAnalyticsCharts();
+        } else if (targetTab === 'tabHistory') {
+          renderFullHistory();
         }
+      });
+    });
+
+    // ================= CÁLCULO DE DASHBOARD EVM =================
+    function updateDashboard() {
+      let totalAC = 0;
+      let totalEV = 0;
+
+      expenses.forEach(item => {
+        totalAC += item.amount;
+        totalEV += (typeof item.basePrice === 'number' ? item.basePrice : item.amount);
+      });
+
+      const remaining = BUDGET - totalAC;
+      const cv = totalEV - totalAC;
+      const cpi = totalAC > 0 ? (totalEV / totalAC) : 1.0;
+
+      setMetric('acValue', '$' + totalAC.toFixed(2));
+      setMetric('remainingValue', '$' + remaining.toFixed(2), remaining < 5 ? 'negative' : remaining < 10 ? 'warn' : 'positive');
+      setMetric('cvValue', (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2), cv < 0 ? 'negative' : cv > 0 ? 'positive' : '');
+      setMetric('cpiValue', cpi.toFixed(2), cpi < 1 ? 'negative' : 'positive');
+
+      // Valores de resumen en pestaña de análisis
+      const summaryEV = document.getElementById('summaryEV');
+      const summaryAC = document.getElementById('summaryAC');
+      const summaryCV = document.getElementById('summaryCV');
+      if (summaryEV) summaryEV.textContent = '$' + totalEV.toFixed(2);
+      if (summaryAC) summaryAC.textContent = '$' + totalAC.toFixed(2);
+      if (summaryCV) {
+        summaryCV.textContent = (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2);
+        summaryCV.style.color = cv < 0 ? 'var(--danger)' : cv > 0 ? 'var(--success)' : 'var(--text)';
       }
 
-      function setMetric(id, value, className) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.textContent = value;
-        el.className = 'metric-value' + (className ? ' ' + className : '');
+      const recBox = document.getElementById('recommendationBox');
+      const recIcon = recBox.querySelector('.rec-icon');
+      const recText = recBox.querySelector('.rec-text');
+
+      // Sugerencias amigables de control de gasto
+      if (cv < 0) {
+        const deficit = Math.abs(cv).toFixed(2);
+        const cafesToCut = Math.ceil(Math.abs(cv) / CAFE_UNIT);
+        recIcon.innerHTML = '<i data-lucide="alert-triangle"></i>';
+        recText.innerHTML = '<strong>Gasto adicional (-$' + deficit + '):</strong> Has gastado un poco más de lo estimado en tus compras.<br><em>Sugerencia de ahorro:</em> Recorta <strong>' + cafesToCut + ' café(s) ☕</strong> ($0.35 c/u) para volver a equilibrar tu semana.';
+        recBox.style.borderLeftColor = 'var(--danger)';
+      } else if (cv > 0) {
+        recIcon.innerHTML = '<i data-lucide="check-circle-2"></i>';
+        recText.innerHTML = '<strong>¡Vas ahorrando! (+$' + cv.toFixed(2) + '):</strong> Tus gastos están por debajo de lo estimado. ¡Excelente control de tu dinero!';
+        recBox.style.borderLeftColor = 'var(--success)';
+      } else {
+        recIcon.innerHTML = '<i data-lucide="thumbs-up"></i>';
+        recText.innerHTML = '<strong>Vas al día:</strong> Tus gastos van exactamente de acuerdo a lo planeado para esta semana.';
+        recBox.style.borderLeftColor = 'var(--accent)';
       }
 
-      // ================= PRODUCT GRID =================
-      function renderProductGrid() {
-        const grid  = document.getElementById('productGrid');
-        const badge = document.getElementById('productCount');
-        badge.textContent = products.length + ' producto' + (products.length !== 1 ? 's' : '');
+      renderTodayExpenseLog();
+      renderFullHistory();
+      saveExpenses();
+      refreshIcons();
 
-        grid.innerHTML = products.map(p => {
-          const spentOnProduct = expenses
-            .filter(e => e.productId === p.id)
-            .reduce((sum, e) => sum + e.amount, 0);
-          
-          const remainingCat = p.price - spentOnProduct;
+      if (activeTabId === 'tabAnalytics') {
+        renderAnalyticsCharts();
+      }
+    }
 
-          let statusClass = 'status--ok';
-          let statusText  = 'Restan $' + remainingCat.toFixed(2);
+    function setMetric(id, value, className) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value;
+      el.className = 'metric-value' + (className ? ' ' + className : '');
+    }
 
-          if (remainingCat < 0) {
-            statusClass = 'status--over';
-            statusText  = 'Excedido $' + Math.abs(remainingCat).toFixed(2);
-          } else if (remainingCat === 0 && spentOnProduct > 0) {
-            statusClass = 'status--zero';
-            statusText  = 'Restan $0.00';
-          }
+    // ================= PRODUCT GRID =================
+    function renderProductGrid() {
+      const grid = document.getElementById('productGrid');
+      const badge = document.getElementById('productCount');
+      badge.textContent = products.length + ' producto' + (products.length !== 1 ? 's' : '');
 
-          return '<button class="product-card" data-id="' + p.id + '" role="listitem" aria-label="Registrar ' + p.name + ' por $' + p.price.toFixed(2) + '">' +
-            '<span class="pc-icon">' + (p.icon || '🏷️') + '</span>' +
-            '<span class="pc-name">' + p.name + '</span>' +
-            '<span class="pc-base">Base: $' + p.price.toFixed(2) + '</span>' +
-            '<span class="pc-status ' + statusClass + '">' + statusText + '</span>' +
+      grid.innerHTML = products.map(p => {
+        const spentOnProduct = expenses
+          .filter(e => e.productId === p.id)
+          .reduce((sum, e) => sum + e.amount, 0);
+
+        const remainingCat = p.price - spentOnProduct;
+
+        let statusClass = 'status--ok';
+        let statusText = 'Restan $' + remainingCat.toFixed(2);
+
+        if (remainingCat < 0) {
+          statusClass = 'status--over';
+          statusText = 'Excedido $' + Math.abs(remainingCat).toFixed(2);
+        } else if (remainingCat === 0 && spentOnProduct > 0) {
+          statusClass = 'status--zero';
+          statusText = 'Restan $0.00';
+        }
+
+        return '<button class="product-card" data-id="' + p.id + '" role="listitem" aria-label="Registrar ' + p.name + ' por $' + p.price.toFixed(2) + '">' +
+          '<span class="pc-icon">' + (p.icon || '🏷️') + '</span>' +
+          '<span class="pc-name">' + p.name + '</span>' +
+          '<span class="pc-base">Estimado: $' + p.price.toFixed(2) + '</span>' +
+          '<span class="pc-status ' + statusClass + '">' + statusText + '</span>' +
           '</button>';
-        }).join('');
+      }).join('');
 
-        grid.querySelectorAll('.product-card').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const product = products.find(p => p.id === btn.dataset.id);
-            if (product) openConfirmPanel(product);
-          });
+      grid.querySelectorAll('.product-card').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const product = products.find(p => p.id === btn.dataset.id);
+          if (product) openConfirmPanel(product);
         });
-      }
+      });
+    }
 
-      // ================= CONFIRM PANEL =================
-      function openConfirmPanel(product) {
-        selectedProduct = product;
-        document.getElementById('confirmProductIcon').textContent = product.icon || '🏷️';
-        document.getElementById('confirmProductName').textContent = product.name;
-        document.getElementById('confirmBasePrice').textContent   = 'Precio base planificado: $' + product.price.toFixed(2);
+    // ================= CONFIRM PANEL =================
+    function openConfirmPanel(product) {
+      selectedProduct = product;
+      document.getElementById('confirmProductIcon').textContent = product.icon || '🏷️';
+      document.getElementById('confirmProductName').textContent = product.name;
+      document.getElementById('confirmBasePrice').textContent = 'Precio estimado: $' + product.price.toFixed(2);
 
-        const amountInput = document.getElementById('confirmAmount');
-        amountInput.value = product.price.toFixed(2);
+      const amountInput = document.getElementById('confirmAmount');
+      amountInput.value = product.price.toFixed(2);
 
-        const panel = document.getElementById('confirmPanel');
-        panel.classList.remove('hidden');
+      const panel = document.getElementById('confirmPanel');
+      panel.classList.remove('hidden');
+      amountInput.focus();
+      amountInput.select();
+
+      document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+      const selCard = document.querySelector('.product-card[data-id="' + product.id + '"]');
+      if (selCard) selCard.classList.add('selected');
+    }
+
+    function closeConfirmPanel() {
+      document.getElementById('confirmPanel').classList.add('hidden');
+      selectedProduct = null;
+      document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+    }
+
+    document.getElementById('cancelConfirmBtn').addEventListener('click', closeConfirmPanel);
+
+    document.getElementById('addExpenseBtn').addEventListener('click', () => {
+      if (!selectedProduct) return;
+      const amountInput = document.getElementById('confirmAmount');
+      const amount = parseFloat(amountInput.value);
+      if (isNaN(amount) || amount <= 0) {
+        showToast('Ingresa un monto válido mayor a $0', 'error');
         amountInput.focus();
-        amountInput.select();
-
-        document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-        const selCard = document.querySelector('.product-card[data-id="' + product.id + '"]');
-        if (selCard) selCard.classList.add('selected');
+        return;
       }
 
-      function closeConfirmPanel() {
-        document.getElementById('confirmPanel').classList.add('hidden');
-        selectedProduct = null;
-        document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
-      }
-
-      document.getElementById('cancelConfirmBtn').addEventListener('click', closeConfirmPanel);
-
-      document.getElementById('addExpenseBtn').addEventListener('click', () => {
-        if (!selectedProduct) return;
-        const amountInput = document.getElementById('confirmAmount');
-        const amount = parseFloat(amountInput.value);
-        if (isNaN(amount) || amount <= 0) {
-          showToast('Ingresa un monto válido mayor a $0', 'error');
-          amountInput.focus();
-          return;
-        }
-
-        expenses.push({
-          id:          genId(),
-          productId:   selectedProduct.id,
-          productName: selectedProduct.name,
-          productIcon: selectedProduct.icon,
-          basePrice:   selectedProduct.price,
-          amount:      amount,
-          date:        new Date().toISOString(),
-        });
-
-        closeConfirmPanel();
-        updateDashboard();
-        renderProductGrid();
-        showToast('✅ Registrado: ' + selectedProduct.name + ' · $' + amount.toFixed(2));
+      expenses.push({
+        id: genId(),
+        productId: selectedProduct.id,
+        productName: selectedProduct.name,
+        productIcon: selectedProduct.icon,
+        basePrice: selectedProduct.price,
+        amount: amount,
+        date: new Date().toISOString(),
       });
 
-      document.getElementById('confirmAmount').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') document.getElementById('addExpenseBtn').click();
-      });
+      closeConfirmPanel();
+      updateDashboard();
+      renderProductGrid();
+      showToast('Registrado: ' + selectedProduct.name + ' · $' + amount.toFixed(2));
+    });
 
-      // ================= HISTORIALES: HOY vs SEMANAL COMPLETO =================
-      function formatDayTitle(isoString) {
-        const dt = new Date(isoString);
-        return dt.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+    document.getElementById('confirmAmount').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('addExpenseBtn').click();
+    });
+
+    // ================= HISTORIALES: HOY vs SEMANAL COMPLETO =================
+    function formatDayTitle(isoString) {
+      const dt = new Date(isoString);
+      return dt.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+    }
+
+    function renderLogItemHTML(item) {
+      const dt = new Date(item.date);
+      const time = dt.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      const diff = item.amount - item.basePrice;
+
+      let diffBadge = '';
+      if (diff > 0) {
+        diffBadge = '<span class="diff diff--over">+$' + diff.toFixed(2) + '</span>';
+      } else if (diff < 0) {
+        diffBadge = '<span class="diff diff--under">-$' + Math.abs(diff).toFixed(2) + '</span>';
+      } else {
+        diffBadge = '<span class="diff diff--exact">$0.00</span>';
       }
 
-      function renderLogItemHTML(item) {
-        const dt   = new Date(item.date);
-        const time = dt.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-        const diff = item.amount - item.basePrice;
-
-        let diffBadge = '';
-        if (diff > 0) {
-          diffBadge = '<span class="diff diff--over">+$' + diff.toFixed(2) + '</span>';
-        } else if (diff < 0) {
-          diffBadge = '<span class="diff diff--under">-$' + Math.abs(diff).toFixed(2) + '</span>';
-        } else {
-          diffBadge = '<span class="diff diff--exact">$0.00</span>';
-        }
-
-        return '<div class="log-item" data-id="' + item.id + '">' +
-          '<span class="log-icon">' + (item.productIcon || '🏷️') + '</span>' +
-          '<div class="log-info">' +
-            '<div class="log-name-row">' +
-              '<span class="log-name">' + item.productName + '</span>' +
-              diffBadge +
-            '</div>' +
-            '<span class="log-date">' + time + ' (Base: $' + item.basePrice.toFixed(2) + ')</span>' +
-          '</div>' +
-          '<span class="log-amount">$' + item.amount.toFixed(2) + '</span>' +
-          '<button class="delete-expense-btn" data-id="' + item.id + '" aria-label="Eliminar gasto ' + item.productName + '">🗑️</button>' +
+      return '<div class="log-item" data-id="' + item.id + '">' +
+        '<span class="log-icon">' + (item.productIcon || '🏷️') + '</span>' +
+        '<div class="log-info">' +
+        '<div class="log-name-row">' +
+        '<span class="log-name">' + item.productName + '</span>' +
+        diffBadge +
+        '</div>' +
+        '<span class="log-date">' + time + ' (Estimado: $' + item.basePrice.toFixed(2) + ')</span>' +
+        '</div>' +
+        '<span class="log-amount">$' + item.amount.toFixed(2) + '</span>' +
+        '<button class="delete-expense-btn" data-id="' + item.id + '" aria-label="Eliminar gasto ' + item.productName + '"><i data-lucide="trash-2"></i></button>' +
         '</div>';
+    }
+
+    // 1. Historial del Día Actual (En pestaña Registro)
+    function renderTodayExpenseLog() {
+      const log = document.getElementById('todayExpenseLog');
+      const badge = document.getElementById('todaySpentBadge');
+      if (!log) return;
+
+      const todayDateKey = new Date().toDateString();
+      const todayItems = expenses.filter(item => new Date(item.date).toDateString() === todayDateKey);
+      const totalToday = todayItems.reduce((acc, curr) => acc + curr.amount, 0);
+
+      if (badge) badge.textContent = 'Total hoy: $' + totalToday.toFixed(2);
+
+      if (todayItems.length === 0) {
+        log.innerHTML = '<p class="empty-state">Sin gastos registrados el día de hoy.</p>';
+        return;
       }
 
-      // 1. Historial del Día Actual (En pestaña Registro)
-      function renderTodayExpenseLog() {
-        const log = document.getElementById('todayExpenseLog');
-        const badge = document.getElementById('todaySpentBadge');
-        if (!log) return;
+      log.innerHTML = todayItems.slice().reverse().map(renderLogItemHTML).join('');
+      attachDeleteEvents(log);
+    }
 
-        const todayDateKey = new Date().toDateString();
-        const todayItems = expenses.filter(item => new Date(item.date).toDateString() === todayDateKey);
-        const totalToday = todayItems.reduce((acc, curr) => acc + curr.amount, 0);
+    // 2. Historial Semanal Completo Agrupado por Días (En pestaña Historial)
+    function renderFullHistory() {
+      const log = document.getElementById('fullExpenseLog');
+      if (!log) return;
 
-        if (badge) badge.textContent = 'Total hoy: $' + totalToday.toFixed(2);
-
-        if (todayItems.length === 0) {
-          log.innerHTML = '<p class="empty-state">Sin gastos registrados el día de hoy.</p>';
-          return;
-        }
-
-        log.innerHTML = todayItems.slice().reverse().map(renderLogItemHTML).join('');
-        attachDeleteEvents(log);
+      if (expenses.length === 0) {
+        log.innerHTML = '<p class="empty-state">Sin gastos registrados esta semana.</p>';
+        return;
       }
 
-      // 2. Historial Semanal Completo Agrupado por Días (En pestaña Historial)
-      function renderFullHistory() {
-        const log = document.getElementById('fullExpenseLog');
-        if (!log) return;
-
-        if (expenses.length === 0) {
-          log.innerHTML = '<p class="empty-state">Sin gastos registrados esta semana.</p>';
-          return;
+      // Agrupación por fecha (ISO date slice o toDateString)
+      const groups = {};
+      expenses.slice().reverse().forEach(item => {
+        const dateObj = new Date(item.date);
+        const dateKey = dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
+        if (!groups[dateKey]) {
+          groups[dateKey] = {
+            title: formatDayTitle(item.date),
+            items: [],
+            total: 0
+          };
         }
+        groups[dateKey].items.push(item);
+        groups[dateKey].total += item.amount;
+      });
 
-        // Agrupación por fecha (ISO date slice o toDateString)
-        const groups = {};
-        expenses.slice().reverse().forEach(item => {
-          const dateObj = new Date(item.date);
-          const dateKey = dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
-          if (!groups[dateKey]) {
-            groups[dateKey] = {
-              title: formatDayTitle(item.date),
-              items: [],
-              total: 0
-            };
-          }
-          groups[dateKey].items.push(item);
-          groups[dateKey].total += item.amount;
-        });
+      // Ordenar llaves de más reciente a más antigua
+      const sortedKeys = Object.keys(groups).sort().reverse();
 
-        // Ordenar llaves de más reciente a más antigua
-        const sortedKeys = Object.keys(groups).sort().reverse();
-
-        log.innerHTML = sortedKeys.map(k => {
-          const group = groups[k];
-          return '<div class="expense-day-group">' +
-            '<div class="day-group-header">' +
-              '<span class="day-group-title">📅 ' + group.title + '</span>' +
-              '<span class="day-group-total">Subtotal: $' + group.total.toFixed(2) + '</span>' +
-            '</div>' +
-            '<div class="expense-log">' +
-              group.items.map(renderLogItemHTML).join('') +
-            '</div>' +
+      log.innerHTML = sortedKeys.map(k => {
+        const group = groups[k];
+        return '<div class="expense-day-group">' +
+          '<div class="day-group-header">' +
+          '<span class="day-group-title"><i data-lucide="calendar"></i> ' + group.title + '</span>' +
+          '<span class="day-group-total">Subtotal: $' + group.total.toFixed(2) + '</span>' +
+          '</div>' +
+          '<div class="expense-log">' +
+          group.items.map(renderLogItemHTML).join('') +
+          '</div>' +
           '</div>';
-        }).join('');
+      }).join('');
 
-        attachDeleteEvents(log);
-      }
+      attachDeleteEvents(log);
+    }
 
-      function attachDeleteEvents(container) {
-        container.querySelectorAll('.delete-expense-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            expenses = expenses.filter(e => e.id !== btn.dataset.id);
-            updateDashboard();
-            renderProductGrid();
-            showToast('Gasto eliminado', 'info');
-          });
-        });
-      }
-
-      document.getElementById('resetBtn').addEventListener('click', () => {
-        if (confirm('¿Reiniciar el presupuesto semanal? Se borrarán todos los gastos de la semana.')) {
-          expenses = [];
+    function attachDeleteEvents(container) {
+      container.querySelectorAll('.delete-expense-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          expenses = expenses.filter(e => e.id !== btn.dataset.id);
           updateDashboard();
           renderProductGrid();
-          showToast('Semana reiniciada 🔄', 'info');
-        }
+          showToast('Gasto eliminado', 'info');
+        });
+      });
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (confirm('¿Reiniciar el presupuesto semanal? Se borrarán todos los gastos de la semana.')) {
+        expenses = [];
+        updateDashboard();
+        renderProductGrid();
+        showToast('Semana reiniciada', 'info');
+      }
+    });
+
+    // ================= DASHBOARD ANALÍTICO: CHART.JS =================
+    function renderAnalyticsCharts() {
+      renderBurnDownChart();
+      renderCategoryComparisonChart();
+      renderCvTrendChart();
+    }
+
+    // Agrupa gastos por día de la semana (Lunes = 0, Domingo = 6)
+    function getWeeklyDailyData() {
+      const dailyAC = [0, 0, 0, 0, 0, 0, 0];
+      const dailyEV = [0, 0, 0, 0, 0, 0, 0];
+
+      expenses.forEach(item => {
+        const dt = new Date(item.date);
+        const dayIndex = (dt.getDay() + 6) % 7; // Lunes = 0 ... Domingo = 6
+        dailyAC[dayIndex] += item.amount;
+        dailyEV[dayIndex] += (typeof item.basePrice === 'number' ? item.basePrice : item.amount);
       });
 
-      // ================= DASHBOARD ANALÍTICO: CHART.JS =================
-      function renderAnalyticsCharts() {
-        renderBurnDownChart();
-        renderCategoryComparisonChart();
-        renderCvTrendChart();
+      return { dailyAC, dailyEV };
+    }
+
+    // a) Gráfica Burn-Down (Línea)
+    function renderBurnDownChart() {
+      const ctx = document.getElementById('burnDownChart');
+      if (!ctx) return;
+
+      const { dailyAC } = getWeeklyDailyData();
+
+      // Calcular presupuesto restante acumulado
+      let currentRemaining = BUDGET;
+      const burnDownValues = [];
+
+      for (let i = 0; i < 7; i++) {
+        currentRemaining -= dailyAC[i];
+        burnDownValues.push(Math.max(0, parseFloat(currentRemaining.toFixed(2))));
       }
 
-      // Agrupa gastos por día de la semana (Lunes = 0, Domingo = 6)
-      function getWeeklyDailyData() {
-        const dailyAC = [0, 0, 0, 0, 0, 0, 0];
-        const dailyEV = [0, 0, 0, 0, 0, 0, 0];
+      if (burnDownChartInstance) burnDownChartInstance.destroy();
 
-        expenses.forEach(item => {
-          const dt = new Date(item.date);
-          const dayIndex = (dt.getDay() + 6) % 7; // Lunes = 0 ... Domingo = 6
-          dailyAC[dayIndex] += item.amount;
-          dailyEV[dayIndex] += (typeof item.basePrice === 'number' ? item.basePrice : item.amount);
-        });
-
-        return { dailyAC, dailyEV };
-      }
-
-      // a) Gráfica Burn-Down (Línea)
-      function renderBurnDownChart() {
-        const ctx = document.getElementById('burnDownChart');
-        if (!ctx) return;
-
-        const { dailyAC } = getWeeklyDailyData();
-
-        // Calcular presupuesto restante acumulado
-        let currentRemaining = BUDGET;
-        const burnDownValues = [];
-
-        for (let i = 0; i < 7; i++) {
-          currentRemaining -= dailyAC[i];
-          burnDownValues.push(Math.max(0, parseFloat(currentRemaining.toFixed(2))));
-        }
-
-        if (burnDownChartInstance) burnDownChartInstance.destroy();
-
-        burnDownChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [
-              {
-                label: 'Presupuesto Restante ($)',
-                data: burnDownValues,
-                borderColor: '#38bdf8',
-                backgroundColor: 'rgba(56, 189, 248, 0.12)',
-                fill: true,
-                tension: 0.3,
-                borderWidth: 3,
-                pointBackgroundColor: '#38bdf8',
-                pointRadius: 4,
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ' Restante: $' + ctx.parsed.y.toFixed(2)
-                }
-              }
-            },
-            scales: {
-              y: {
-                min: 0,
-                max: BUDGET,
-                ticks: { color: '#94a3b8', callback: v => '$' + v },
-                grid: { color: 'rgba(255, 255, 255, 0.06)' }
-              },
-              x: {
-                ticks: { color: '#cbd5e1' },
-                grid: { color: 'transparent' }
+      burnDownChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+          datasets: [
+            {
+              label: 'Presupuesto Restante ($)',
+              data: burnDownValues,
+              borderColor: '#38bdf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.12)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 3,
+              pointBackgroundColor: '#38bdf8',
+              pointRadius: 4,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ' Restante: $' + ctx.parsed.y.toFixed(2)
               }
             }
-          }
-        });
-      }
-
-      // b) Gráfico de Barras: EV vs AC por Categoría
-      function renderCategoryComparisonChart() {
-        const ctx = document.getElementById('categoryComparisonChart');
-        if (!ctx) return;
-
-        const catLabels = products.map(p => p.name);
-        const evValues  = products.map(p => p.price);
-        const acValues  = products.map(p => {
-          return expenses
-            .filter(e => e.productId === p.id)
-            .reduce((sum, e) => sum + e.amount, 0);
-        });
-
-        if (categoryChartInstance) categoryChartInstance.destroy();
-
-        categoryChartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: catLabels,
-            datasets: [
-              {
-                label: 'Línea Base (EV)',
-                data: evValues,
-                backgroundColor: 'rgba(99, 102, 241, 0.75)',
-                borderColor: '#6366f1',
-                borderWidth: 1,
-                borderRadius: 4,
-              },
-              {
-                label: 'Gasto Real (AC)',
-                data: acValues,
-                backgroundColor: 'rgba(56, 189, 248, 0.75)',
-                borderColor: '#38bdf8',
-                borderWidth: 1,
-                borderRadius: 4,
-              }
-            ]
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                labels: { color: '#cbd5e1', font: { size: 11 } }
-              },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ' ' + ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2)
-                }
-              }
+          scales: {
+            y: {
+              min: 0,
+              max: BUDGET,
+              ticks: { color: '#94a3b8', callback: v => '$' + v },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
             },
-            scales: {
-              y: {
-                ticks: { color: '#94a3b8', callback: v => '$' + v },
-                grid: { color: 'rgba(255, 255, 255, 0.06)' }
-              },
-              x: {
-                ticks: { color: '#cbd5e1', font: { size: 10 } },
-                grid: { color: 'transparent' }
-              }
+            x: {
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'transparent' }
             }
           }
-        });
-      }
-
-      // c) Tendencia de Varianza de Costo (CV) Acumulada
-      function renderCvTrendChart() {
-        const ctx = document.getElementById('cvTrendChart');
-        if (!ctx) return;
-
-        const { dailyAC, dailyEV } = getWeeklyDailyData();
-
-        let cumEV = 0;
-        let cumAC = 0;
-        const cvTrend = [];
-
-        for (let i = 0; i < 7; i++) {
-          cumEV += dailyEV[i];
-          cumAC += dailyAC[i];
-          cvTrend.push(parseFloat((cumEV - cumAC).toFixed(2)));
         }
+      });
+    }
 
-        const badge = document.getElementById('cvTrendBadge');
-        const lastCV = cvTrend[cvTrend.length - 1];
-        if (badge) {
-          badge.textContent = (lastCV >= 0 ? '+$' : '-$') + Math.abs(lastCV).toFixed(2);
-          badge.style.color = lastCV < 0 ? '#fca5a5' : '#86efac';
-        }
+    // b) Gráfico de Barras: EV vs AC por Categoría
+    function renderCategoryComparisonChart() {
+      const ctx = document.getElementById('categoryComparisonChart');
+      if (!ctx) return;
 
-        if (cvTrendChartInstance) cvTrendChartInstance.destroy();
+      const catLabels = products.map(p => p.name);
+      const evValues = products.map(p => p.price);
+      const acValues = products.map(p => {
+        return expenses
+          .filter(e => e.productId === p.id)
+          .reduce((sum, e) => sum + e.amount, 0);
+      });
 
-        cvTrendChartInstance = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            datasets: [
-              {
-                label: 'Varianza Acumulada (CV)',
-                data: cvTrend,
-                borderColor: lastCV < 0 ? '#ef4444' : '#22c55e',
-                backgroundColor: lastCV < 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-                fill: true,
-                tension: 0.3,
-                borderWidth: 2.5,
-                pointRadius: 4,
-                pointBackgroundColor: lastCV < 0 ? '#ef4444' : '#22c55e'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: (ctx) => ' CV: ' + (ctx.parsed.y >= 0 ? '+$' : '-$') + Math.abs(ctx.parsed.y).toFixed(2)
-                }
-              }
+      if (categoryChartInstance) categoryChartInstance.destroy();
+
+      categoryChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: catLabels,
+          datasets: [
+            {
+              label: 'Presupuestado',
+              data: evValues,
+              backgroundColor: 'rgba(99, 102, 241, 0.75)',
+              borderColor: '#6366f1',
+              borderWidth: 1,
+              borderRadius: 4,
             },
-            scales: {
-              y: {
-                ticks: { color: '#94a3b8', callback: v => (v >= 0 ? '+$' : '-$') + Math.abs(v) },
-                grid: { color: 'rgba(255, 255, 255, 0.06)' }
-              },
-              x: {
-                ticks: { color: '#cbd5e1' },
-                grid: { color: 'transparent' }
+            {
+              label: 'Gasto Real',
+              data: acValues,
+              backgroundColor: 'rgba(56, 189, 248, 0.75)',
+              borderColor: '#38bdf8',
+              borderWidth: 1,
+              borderRadius: 4,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#cbd5e1', font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ' ' + ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2)
               }
             }
+          },
+          scales: {
+            y: {
+              ticks: { color: '#94a3b8', callback: v => '$' + v },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            x: {
+              ticks: { color: '#cbd5e1', font: { size: 10 } },
+              grid: { color: 'transparent' }
+            }
           }
-        });
+        }
+      });
+    }
+
+    // c) Tendencia de Varianza de Costo (CV) Acumulada
+    function renderCvTrendChart() {
+      const ctx = document.getElementById('cvTrendChart');
+      if (!ctx) return;
+
+      const { dailyAC, dailyEV } = getWeeklyDailyData();
+
+      let cumEV = 0;
+      let cumAC = 0;
+      const cvTrend = [];
+
+      for (let i = 0; i < 7; i++) {
+        cumEV += dailyEV[i];
+        cumAC += dailyAC[i];
+        cvTrend.push(parseFloat((cumEV - cumAC).toFixed(2)));
       }
 
-      // ================= MODAL ADMINISTRAR PRODUCTOS =================
-      function openProductsModal() {
-        document.getElementById('productsModal').classList.remove('hidden');
+      const badge = document.getElementById('cvTrendBadge');
+      const lastCV = cvTrend[cvTrend.length - 1];
+      if (badge) {
+        badge.textContent = (lastCV >= 0 ? '+$' : '-$') + Math.abs(lastCV).toFixed(2);
+        badge.style.color = lastCV < 0 ? '#fca5a5' : '#86efac';
+      }
+
+      if (cvTrendChartInstance) cvTrendChartInstance.destroy();
+
+      cvTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+          datasets: [
+            {
+              label: 'Balance Acumulado',
+              data: cvTrend,
+              borderColor: lastCV < 0 ? '#ef4444' : '#22c55e',
+              backgroundColor: lastCV < 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+              fill: true,
+              tension: 0.3,
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: lastCV < 0 ? '#ef4444' : '#22c55e'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ' Balance: ' + (ctx.parsed.y >= 0 ? '+$' : '-$') + Math.abs(ctx.parsed.y).toFixed(2)
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: { color: '#94a3b8', callback: v => (v >= 0 ? '+$' : '-$') + Math.abs(v) },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            x: {
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'transparent' }
+            }
+          }
+        }
+      });
+    }
+
+    // ================= MODAL ADMINISTRAR PRODUCTOS =================
+    function openProductsModal() {
+      document.getElementById('productsModal').classList.remove('hidden');
+      renderAdminList();
+      resetProductForm();
+    }
+    function closeProductsModal() {
+      document.getElementById('productsModal').classList.add('hidden');
+      editingId = null;
+    }
+
+    document.getElementById('openProductsBtn').addEventListener('click', openProductsModal);
+    document.getElementById('closeProductsBtn').addEventListener('click', closeProductsModal);
+    document.getElementById('productsModal').addEventListener('click', (e) => {
+      if (e.target.id === 'productsModal') closeProductsModal();
+    });
+
+    function resetProductForm() {
+      editingId = null;
+      document.getElementById('pName').value = '';
+      document.getElementById('pPrice').value = '';
+      document.getElementById('pIcon').value = '';
+      document.getElementById('productFormTitle').innerHTML = '<i data-lucide="plus-circle"></i> Nuevo Producto / Categoría';
+      document.getElementById('saveProductBtn').textContent = 'Guardar';
+      document.getElementById('cancelEditBtn').classList.add('hidden');
+      refreshIcons();
+    }
+
+    function renderAdminList() {
+      const list = document.getElementById('adminProductList');
+      if (products.length === 0) {
+        list.innerHTML = '<p class="empty-state" style="padding:16px">No hay productos. Agrega uno arriba.</p>';
+        return;
+      }
+
+      list.innerHTML = products.map(p =>
+        '<div class="admin-item" role="listitem">' +
+        '<span class="admin-icon">' + (p.icon || '🏷️') + '</span>' +
+        '<div class="admin-info">' +
+        '<span class="admin-name">' + p.name + '</span>' +
+        '<span class="admin-price">Estimado: $' + p.price.toFixed(2) + '</span>' +
+        '</div>' +
+        '<div class="admin-actions">' +
+        '<button class="icon-btn edit-product-btn" data-id="' + p.id + '" aria-label="Editar ' + p.name + '"><i data-lucide="pencil"></i></button>' +
+        '<button class="icon-btn delete-product-btn" data-id="' + p.id + '" aria-label="Eliminar ' + p.name + '"><i data-lucide="trash-2"></i></button>' +
+        '</div>' +
+        '</div>'
+      ).join('');
+
+      list.querySelectorAll('.edit-product-btn').forEach(btn => {
+        btn.addEventListener('click', () => startEditProduct(btn.dataset.id));
+      });
+      list.querySelectorAll('.delete-product-btn').forEach(btn => {
+        btn.addEventListener('click', () => deleteProduct(btn.dataset.id));
+      });
+      refreshIcons();
+    }
+
+    function startEditProduct(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      editingId = id;
+      document.getElementById('pName').value = product.name;
+      document.getElementById('pPrice').value = product.price.toFixed(2);
+      document.getElementById('pIcon').value = product.icon || '';
+      document.getElementById('productFormTitle').innerHTML = '<i data-lucide="pencil"></i> Editar Producto';
+      document.getElementById('saveProductBtn').textContent = 'Actualizar';
+      document.getElementById('cancelEditBtn').classList.remove('hidden');
+      document.getElementById('pName').focus();
+      document.getElementById('productFormWrapper').scrollIntoView({ behavior: 'smooth' });
+      refreshIcons();
+    }
+
+    function deleteProduct(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      if (confirm('¿Eliminar "' + product.name + '"?')) {
+        products = products.filter(p => p.id !== id);
+        saveProducts();
         renderAdminList();
-        resetProductForm();
+        renderProductGrid();
+        showToast('"' + product.name + '" eliminado', 'info');
       }
-      function closeProductsModal() {
-        document.getElementById('productsModal').classList.add('hidden');
-        editingId = null;
+    }
+
+    document.getElementById('cancelEditBtn').addEventListener('click', resetProductForm);
+
+    document.getElementById('saveProductBtn').addEventListener('click', () => {
+      const name = document.getElementById('pName').value.trim();
+      const price = parseFloat(document.getElementById('pPrice').value);
+      const icon = document.getElementById('pIcon').value.trim();
+
+      if (!name) { showToast('El nombre es requerido', 'error'); return; }
+      if (isNaN(price) || price < 0) { showToast('Ingresa un precio válido', 'error'); return; }
+
+      if (editingId) {
+        products = products.map(p => p.id === editingId ? { ...p, name, price, icon } : p);
+        showToast('"' + name + '" actualizado');
+      } else {
+        products.push({ id: genId(), name, price, icon: icon || '🏷️' });
+        showToast('"' + name + '" creado');
       }
+      saveProducts();
+      renderAdminList();
+      renderProductGrid();
+      resetProductForm();
+    });
 
-      document.getElementById('openProductsBtn').addEventListener('click', openProductsModal);
-      document.getElementById('closeProductsBtn').addEventListener('click', closeProductsModal);
-      document.getElementById('productsModal').addEventListener('click', (e) => {
-        if (e.target.id === 'productsModal') closeProductsModal();
-      });
-
-      function resetProductForm() {
-        editingId = null;
-        document.getElementById('pName').value  = '';
-        document.getElementById('pPrice').value = '';
-        document.getElementById('pIcon').value  = '';
-        document.getElementById('productFormTitle').textContent = '➕ Nuevo Producto / Categoría';
-        document.getElementById('saveProductBtn').textContent   = 'Guardar';
-        document.getElementById('cancelEditBtn').classList.add('hidden');
-      }
-
-      function renderAdminList() {
-        const list = document.getElementById('adminProductList');
-        if (products.length === 0) {
-          list.innerHTML = '<p class="empty-state" style="padding:16px">No hay productos. Agrega uno arriba.</p>';
-          return;
-        }
-
-        list.innerHTML = products.map(p =>
-          '<div class="admin-item" role="listitem">' +
-            '<span class="admin-icon">' + (p.icon || '🏷️') + '</span>' +
-            '<div class="admin-info">' +
-              '<span class="admin-name">' + p.name + '</span>' +
-              '<span class="admin-price">Línea Base: $' + p.price.toFixed(2) + '</span>' +
-            '</div>' +
-            '<div class="admin-actions">' +
-              '<button class="icon-btn edit-product-btn" data-id="' + p.id + '" aria-label="Editar ' + p.name + '">✏️</button>' +
-              '<button class="icon-btn delete-product-btn" data-id="' + p.id + '" aria-label="Eliminar ' + p.name + '">🗑️</button>' +
-            '</div>' +
-          '</div>'
-        ).join('');
-
-        list.querySelectorAll('.edit-product-btn').forEach(btn => {
-          btn.addEventListener('click', () => startEditProduct(btn.dataset.id));
-        });
-        list.querySelectorAll('.delete-product-btn').forEach(btn => {
-          btn.addEventListener('click', () => deleteProduct(btn.dataset.id));
-        });
-      }
-
-      function startEditProduct(id) {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-        editingId = id;
-        document.getElementById('pName').value  = product.name;
-        document.getElementById('pPrice').value = product.price.toFixed(2);
-        document.getElementById('pIcon').value  = product.icon || '';
-        document.getElementById('productFormTitle').textContent = '✏️ Editar Producto';
-        document.getElementById('saveProductBtn').textContent   = 'Actualizar';
-        document.getElementById('cancelEditBtn').classList.remove('hidden');
-        document.getElementById('pName').focus();
-        document.getElementById('productFormWrapper').scrollIntoView({ behavior: 'smooth' });
-      }
-
-      function deleteProduct(id) {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-        if (confirm('¿Eliminar "' + product.name + '"?')) {
-          products = products.filter(p => p.id !== id);
-          saveProducts();
-          renderAdminList();
-          renderProductGrid();
-          showToast('"' + product.name + '" eliminado', 'info');
-        }
-      }
-
-      document.getElementById('cancelEditBtn').addEventListener('click', resetProductForm);
-
-      document.getElementById('saveProductBtn').addEventListener('click', () => {
-        const name  = document.getElementById('pName').value.trim();
-        const price = parseFloat(document.getElementById('pPrice').value);
-        const icon  = document.getElementById('pIcon').value.trim();
-
-        if (!name)                     { showToast('El nombre es requerido', 'error'); return; }
-        if (isNaN(price) || price < 0) { showToast('Ingresa un precio válido', 'error'); return; }
-
-        if (editingId) {
-          products = products.map(p => p.id === editingId ? { ...p, name, price, icon } : p);
-          showToast('"' + name + '" actualizado ✏️');
-        } else {
-          products.push({ id: genId(), name, price, icon: icon || '🏷️' });
-          showToast('"' + name + '" creado ✅');
-        }
+    // Restaurar Productos por Defecto
+    document.getElementById('restoreDefaultsBtn').addEventListener('click', () => {
+      if (confirm('¿Restaurar los 7 productos y presupuestos por defecto?')) {
+        products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
         saveProducts();
         renderAdminList();
         renderProductGrid();
         resetProductForm();
-      });
+        showToast('Productos por defecto restaurados');
+      }
+    });
 
-      // Restaurar Productos por Defecto
-      document.getElementById('restoreDefaultsBtn').addEventListener('click', () => {
-        if (confirm('¿Restaurar los 7 productos y líneas base por defecto?')) {
-          products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-          saveProducts();
-          renderAdminList();
-          renderProductGrid();
-          resetProductForm();
-          showToast('Productos por defecto restaurados ✅');
-        }
-      });
+    // ================= INICIALIZACIÓN =================
+    renderProductGrid();
+    updateDashboard();
+    refreshIcons();
+  </script>
+</body>
 
-      // ================= INICIALIZACIÓN =================
-      renderProductGrid();
-      updateDashboard();
-    </script>
-  </body>
 </html>
