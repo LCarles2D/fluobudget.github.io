@@ -1500,7 +1500,7 @@
 
       setMetric('acValue', '$' + totalAC.toFixed(2));
       setMetric('remainingValue', '$' + remaining.toFixed(2), remaining < 5 ? 'negative' : remaining < 10 ? 'warn' : 'positive');
-      setMetric('cvValue', (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2), cv < 0 ? 'negative' : cv > 0 ? 'positive' : '');
+      setMetric('cvValue', Math.abs(cv) < 0.0001 ? '$0.00' : (cv > 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2), cv < -0.0001 ? 'negative' : cv > 0.0001 ? 'positive' : '');
       setMetric('cpiValue', cpi.toFixed(2), cpi < 1 ? 'negative' : 'positive');
 
       // Valores de resumen en pestaña de análisis
@@ -1510,8 +1510,13 @@
       if (summaryEV) summaryEV.textContent = '$' + totalEV.toFixed(2);
       if (summaryAC) summaryAC.textContent = '$' + totalAC.toFixed(2);
       if (summaryCV) {
-        summaryCV.textContent = (cv >= 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2);
-        summaryCV.style.color = cv < 0 ? 'var(--danger)' : cv > 0 ? 'var(--success)' : 'var(--text)';
+        if (Math.abs(cv) < 0.0001) {
+          summaryCV.textContent = '$0.00';
+          summaryCV.style.color = 'var(--text)';
+        } else {
+          summaryCV.textContent = (cv > 0 ? '+$' : '-$') + Math.abs(cv).toFixed(2);
+          summaryCV.style.color = cv < 0 ? 'var(--danger)' : 'var(--success)';
+        }
       }
 
       const recBox = document.getElementById('recommendationBox');
@@ -1843,7 +1848,10 @@
             y: {
               min: 0,
               max: BUDGET,
-              ticks: { color: '#94a3b8', callback: v => '$' + v },
+              ticks: {
+                color: '#94a3b8',
+                callback: (v) => '$' + Number(v).toFixed(2)
+              },
               grid: { color: 'rgba(255, 255, 255, 0.06)' }
             },
             x: {
@@ -1908,7 +1916,10 @@
           },
           scales: {
             y: {
-              ticks: { color: '#94a3b8', callback: v => '$' + v },
+              ticks: {
+                color: '#94a3b8',
+                callback: (v) => '$' + Number(v).toFixed(2)
+              },
               grid: { color: 'rgba(255, 255, 255, 0.06)' }
             },
             x: {
@@ -1940,8 +1951,13 @@
       const badge = document.getElementById('cvTrendBadge');
       const lastCV = cvTrend[cvTrend.length - 1];
       if (badge) {
-        badge.textContent = (lastCV >= 0 ? '+$' : '-$') + Math.abs(lastCV).toFixed(2);
-        badge.style.color = lastCV < 0 ? '#fca5a5' : '#86efac';
+        if (Math.abs(lastCV) < 0.0001) {
+          badge.textContent = '$0.00';
+          badge.style.color = '#86efac';
+        } else {
+          badge.textContent = (lastCV > 0 ? '+$' : '-$') + Math.abs(lastCV).toFixed(2);
+          badge.style.color = lastCV < 0 ? '#fca5a5' : '#86efac';
+        }
       }
 
       if (cvTrendChartInstance) cvTrendChartInstance.destroy();
@@ -1971,13 +1987,24 @@
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (ctx) => ' Balance: ' + (ctx.parsed.y >= 0 ? '+$' : '-$') + Math.abs(ctx.parsed.y).toFixed(2)
+                label: (ctx) => {
+                  const val = ctx.parsed.y;
+                  if (Math.abs(val) < 0.0001) return ' Balance: $0.00';
+                  return ' Balance: ' + (val > 0 ? '+$' : '-$') + Math.abs(val).toFixed(2);
+                }
               }
             }
           },
           scales: {
             y: {
-              ticks: { color: '#94a3b8', callback: v => (v >= 0 ? '+$' : '-$') + Math.abs(v) },
+              ticks: {
+                color: '#94a3b8',
+                callback: (v) => {
+                  const num = Number(v);
+                  if (Math.abs(num) < 0.0001) return '$0.00';
+                  return (num > 0 ? '+$' : '-$') + Math.abs(num).toFixed(2);
+                }
+              },
               grid: { color: 'rgba(255, 255, 255, 0.06)' }
             },
             x: {
