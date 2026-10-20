@@ -3,59 +3,19 @@ interface Props {
   id: string;
   title: string;
   defaultValue: string;
-  icon?: string;
+  lucideIcon?: string;
+  emojiIcon?: string;
 }
 
-const { id, title, defaultValue, icon } = Astro.props;
+const { id, title, defaultValue, lucideIcon, emojiIcon } = Astro.props;
 ---
 
-<div class="metric">
-  {icon && <div class="metric-icon">{icon}</div>}
-  <div class="metric-title">{title}</div>
+<div class="metric-card-inner">
+  <div class="metric-header">
+    <span class="metric-icon">
+      {lucideIcon ? <i data-lucide={lucideIcon}></i> : emojiIcon || "📊"}
+    </span>
+    <span class="metric-title">{title}</span>
+  </div>
   <div class="metric-value" id={id}>{defaultValue}</div>
 </div>
-
-<style>
-  .metric {
-    background: linear-gradient(135deg, #1e293b 0%, #243044 100%);
-    padding: 14px 12px;
-    border-radius: 14px;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .metric::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    opacity: 0.7;
-  }
-  .metric:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
-  }
-  .metric-icon {
-    font-size: 1.2rem;
-    margin-bottom: 4px;
-  }
-  .metric-title {
-    font-size: 0.68rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-  }
-  .metric-value {
-    font-size: 1.35rem;
-    font-weight: 800;
-    margin-top: 6px;
-    color: #f8fafc;
-    transition: color 0.3s ease;
-  }
-</style>

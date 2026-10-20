@@ -1,0 +1,40 @@
+---
+interface Props {
+  budgetFormatted?: string;
+}
+
+const { budgetFormatted = "$30.00" } = Astro.props;
+---
+
+<header class="app-header">
+  <div class="header-left">
+    <div class="app-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="36" height="36" aria-hidden="true">
+        <defs>
+          <linearGradient id="fluoGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#22c55e" />
+            <stop offset="100%" stop-color="#3b82f6" />
+          </linearGradient>
+        </defs>
+        <rect x="5" y="5" width="110" height="110" rx="28" fill="#1e293b" stroke="#334155" stroke-width="2" />
+        <path
+          d="M 40 85 L 40 45 C 40 36.5 46.5 30 55 30 L 75 30"
+          fill="none"
+          stroke="url(#fluoGradient)"
+          stroke-width="12"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path d="M 40 58 L 60 58" fill="none" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" />
+        <circle cx="75" cy="30" r="6" fill="#3b82f6" />
+      </svg>
+    </div>
+    <div>
+      <h1 class="app-title">Fluo Budget</h1>
+      <p class="app-subtitle">Semana · Presupuesto {budgetFormatted}</p>
+    </div>
+  </div>
+  <button id="openProductsBtn" class="icon-btn" aria-label="Administrar Productos" title="Administrar Productos">
+    <i data-lucide="settings"></i>
+  </button>
+</header>

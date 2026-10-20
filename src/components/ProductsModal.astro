@@ -1,0 +1,68 @@
+---
+---
+
+<div id="productsModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2 id="modalTitle" class="modal-title">
+        <i data-lucide="settings"></i> Administrar Productos
+      </h2>
+      <button id="closeProductsBtn" class="icon-btn" aria-label="Cerrar modal" type="button">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <div class="product-form card-inner" id="productFormWrapper">
+      <h3 class="form-subtitle" id="productFormTitle">
+        <i data-lucide="plus-circle"></i> Nuevo Producto / Categoría
+      </h3>
+      <div class="form-row">
+        <input
+          type="text"
+          id="pName"
+          class="form-input"
+          placeholder="Nombre (ej. Súper)"
+          maxlength="30"
+          aria-label="Nombre del producto"
+        />
+        <input
+          type="number"
+          id="pPrice"
+          class="form-input form-input--sm"
+          step="0.01"
+          min="0"
+          placeholder="$ Estimado"
+          inputmode="decimal"
+          aria-label="Precio estimado"
+        />
+      </div>
+      <div class="form-row">
+        <input
+          type="text"
+          id="pIcon"
+          class="form-input form-input--icon"
+          placeholder="Emoji"
+          maxlength="4"
+          aria-label="Emoji del producto"
+        />
+        <div class="form-actions">
+          <button id="cancelEditBtn" class="btn btn-ghost btn-sm hidden" type="button">Cancelar</button>
+          <button id="saveProductBtn" class="btn btn-primary btn-sm" type="button">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="adminProductList" class="admin-list" role="list" aria-label="Lista de productos"></div>
+
+    <div class="admin-footer">
+      <button
+        id="restoreDefaultsBtn"
+        class="btn btn-ghost btn-sm"
+        title="Restaura los 7 productos y presupuestos predefinidos"
+        type="button"
+      >
+        <i data-lucide="rotate-ccw"></i> Restaurar productos por defecto
+      </button>
+    </div>
+  </div>
+</div>

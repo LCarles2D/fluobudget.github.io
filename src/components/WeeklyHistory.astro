@@ -1,0 +1,19 @@
+---
+---
+
+<section id="tabHistory" class="tab-view hidden" aria-labelledby="historyTitle">
+  <div class="card">
+    <div class="section-header">
+      <h2 id="historyTitle" class="section-title">
+        <span class="title-icon"><i data-lucide="clipboard-list"></i></span> Historial Semanal
+      </h2>
+      <button id="resetBtn" class="btn btn-danger-ghost btn-sm" aria-label="Reiniciar semana" type="button">
+        <i data-lucide="rotate-ccw"></i> Reset Semana
+      </button>
+    </div>
+
+    <div id="fullExpenseLog" class="expense-log" aria-live="polite">
+      <p class="empty-state">Sin gastos registrados esta semana.</p>
+    </div>
+  </div>
+</section>

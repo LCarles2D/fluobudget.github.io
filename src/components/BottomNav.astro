@@ -1,0 +1,43 @@
+---
+---
+
+<nav class="bottom-nav" aria-label="Navegación principal">
+  <div class="nav-container">
+    <button
+      id="navRegisterBtn"
+      class="nav-btn active"
+      data-tab="tabRegister"
+      aria-label="Pantalla de Registro"
+      type="button"
+    >
+      <span class="nav-icon"><i data-lucide="zap"></i></span>
+      <span>Registro</span>
+    </button>
+    <button
+      id="navHistoryBtn"
+      class="nav-btn"
+      data-tab="tabHistory"
+      aria-label="Pantalla de Historial"
+      type="button"
+    >
+      <span class="nav-icon"><i data-lucide="clipboard-list"></i></span>
+      <span>Historial</span>
+    </button>
+    <button
+      id="navAnalyticsBtn"
+      class="nav-btn"
+      data-tab="tabAnalytics"
+      aria-label="Pantalla de Análisis"
+      type="button"
+    >
+      <span class="nav-icon"><i data-lucide="pie-chart"></i></span>
+      <span>Análisis</span>
+    </button>
+  </div>
+</nav>
+
+<style>
+  .nav-btn * {
+    pointer-events: none;
+  }
+</style>

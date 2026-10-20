@@ -1,0 +1,45 @@
+---
+---
+
+<div class="card" id="quickRegisterSection" aria-labelledby="quickTitle">
+  <div class="section-header">
+    <h2 id="quickTitle" class="section-title">
+      <span class="title-icon"><i data-lucide="zap"></i></span> Registro Rápido
+    </h2>
+    <span class="badge" id="productCount">0 productos</span>
+  </div>
+
+  <div id="productGrid" class="product-grid" role="list" aria-label="Productos y categorías disponibles"></div>
+
+  <!-- Panel de confirmación -->
+  <div id="confirmPanel" class="confirm-panel hidden" role="dialog" aria-label="Confirmar gasto">
+    <div class="confirm-header">
+      <span id="confirmProductIcon" class="confirm-icon">🛒</span>
+      <div>
+        <p class="confirm-label" id="confirmProductName">Categoría</p>
+        <p class="confirm-base-price" id="confirmBasePrice">Presupuesto: $0.00 · Disponible: $0.00</p>
+      </div>
+    </div>
+    <div class="confirm-amount-row">
+      <label for="confirmAmount" class="confirm-amount-label">¿Cuánto gastaste hoy? ($):</label>
+      <input
+        type="number"
+        id="confirmAmount"
+        class="confirm-amount-input"
+        step="0.01"
+        min="0"
+        placeholder="0.00"
+        inputmode="decimal"
+        aria-label="Monto real del gasto de hoy"
+      />
+    </div>
+    <div class="confirm-actions">
+      <button id="cancelConfirmBtn" class="btn btn-ghost" type="button">
+        <i data-lucide="x"></i> Cancelar
+      </button>
+      <button id="addExpenseBtn" class="btn btn-primary" type="button">
+        <i data-lucide="check"></i> Registrar
+      </button>
+    </div>
+  </div>
+</div>

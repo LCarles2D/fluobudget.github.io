@@ -1,0 +1,58 @@
+---
+---
+
+<section id="tabAnalytics" class="tab-view hidden" aria-labelledby="analyticsTitle">
+  <h2 id="analyticsTitle" class="visually-hidden" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Análisis y Gráficas EVM</h2>
+
+  <!-- RESUMEN DE PÍLDORAS -->
+  <div class="analytics-summary-grid">
+    <div class="analytics-pill">
+      <div class="pill-label">Presupuesto</div>
+      <div class="pill-value" id="summaryEV">$0.00</div>
+    </div>
+    <div class="analytics-pill">
+      <div class="pill-label">Total Gastado</div>
+      <div class="pill-value" id="summaryAC">$0.00</div>
+    </div>
+    <div class="analytics-pill">
+      <div class="pill-label">Balance Neto</div>
+      <div class="pill-value" id="summaryCV">$0.00</div>
+    </div>
+  </div>
+
+  <!-- GRÁFICA A: CONSUMO DE PRESUPUESTO (BURN-DOWN) -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <h3 class="chart-title"><i data-lucide="flame"></i> Consumo de Presupuesto</h3>
+      <span class="badge">De $30 a $0</span>
+    </div>
+    <p class="chart-desc">Seguimiento de tu dinero disponible a lo largo de la semana.</p>
+    <div class="chart-container">
+      <canvas id="burnDownChart"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICA B: PRESUPUESTO VS GASTO REAL POR CATEGORÍA -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <h3 class="chart-title"><i data-lucide="bar-chart-2"></i> Presupuesto vs Gasto Real</h3>
+      <span class="badge">Por Categoría</span>
+    </div>
+    <p class="chart-desc">Compara cuánto planeabas gastar contra lo que realmente gastaste en cada categoría.</p>
+    <div class="chart-container">
+      <canvas id="categoryComparisonChart"></canvas>
+    </div>
+  </div>
+
+  <!-- GRÁFICA C: TENDENCIA DE AHORRO / BALANCE (CV ACUMULADO) -->
+  <div class="card chart-card">
+    <div class="chart-header">
+      <h3 class="chart-title"><i data-lucide="trending-up"></i> Tendencia de Ahorro</h3>
+      <span class="badge" id="cvTrendBadge">Balance Acumulado</span>
+    </div>
+    <p class="chart-desc">Muestra si vas acumulando ahorros (arriba de $0) o sobrecostos (debajo de $0).</p>
+    <div class="chart-container">
+      <canvas id="cvTrendChart"></canvas>
+    </div>
+  </div>
+</section>
